@@ -7,6 +7,7 @@ import {
   FileText, User, Briefcase, Car, Wallet, Calculator, CheckCircle2,
   Plus, Trash2, Save, FileSpreadsheet, PlusCircle, ArrowRight, Eye, Edit3, ShieldAlert
 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 const BookingModule = () => {
   // 1 & 2. Source and Vehicle Type
@@ -58,6 +59,8 @@ const BookingModule = () => {
 
   const [review, setReview] = useState({ status: 'Pending', reminderDate: '', type: 'Payment', notes: '' });
   const [showModal, setShowModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   const handleFinChange = (e) => setFin({ ...fin, [e.target.name]: parseFloat(e.target.value) || 0 });
   const handleColChange = (e) => setCollection({ ...collection, [e.target.name]: parseFloat(e.target.value) || 0 });
@@ -126,7 +129,90 @@ const BookingModule = () => {
     generatedRoute += ' -> ' + basic.pickup;
   }
 
-  const handleSave = () => setShowModal(true);
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError(null);
+
+    const bookingData = {
+      booking_id: `UT-2026-${Date.now()}`,
+      booking_source: bookingSource,
+      service_vehicle_type: serviceVehicleType,
+      driver_ownership: driverOwnership,
+      vehicle_ownership: vehicleOwnership,
+      booking_status: basic.status,
+      booking_date: basic.date,
+      pickup_datetime: basic.pickupDate,
+      trip_type: basic.tripType,
+      number_of_days: basic.days,
+      pickup_location: basic.pickup,
+      drop_location: basic.drop,
+      route: generatedRoute,
+      notes: basic.notes,
+      
+      customer_name: customer.name,
+      customer_mobile: customer.mobile,
+      alternate_mobile: customer.altMobile,
+      customer_email: customer.email,
+      
+      vendor_name: vendor.name,
+      vendor_mobile: vendor.mobile,
+      panel_owner: vendor.panelOwner,
+      platform_name: vendor.platformName,
+      
+      driver_name: driver.name,
+      driver_mobile: driver.mobile,
+      vehicle_number: driver.vehicleNo,
+      vehicle_model: driver.model,
+      vehicle_category: driver.category,
+      fuel_type: driver.fuel,
+      
+      my_amount: fin.myAmount,
+      vendor_amount: fin.vendorOrDriverAmount,
+      driver_amount: driverOwnership === 'Outside Driver' ? fin.vendorOrDriverAmount : 0,
+      total_booking_amount: fin.totalBookingAmount,
+      commission_percentage: fin.commissionPercentage,
+      commission_amount: fin.commissionAmount,
+      
+      collection_done_by: collection.doneBy,
+      collection_mode: collection.mode,
+      cash_collection_amount: collection.cash,
+      paytm_collection_amount: collection.paytm,
+      upi_collection_amount: collection.upi,
+      bank_collection_amount: collection.bank,
+      collection_total: totalDriverCollection,
+      
+      total_trip_expenses: totalTripExpenses,
+      expense_cng: expenses.find(e => e.type === 'CNG')?.amount || 0,
+      expense_petrol_filled: expenses.find(e => e.type === 'Petrol Filled')?.amount || 0,
+      expense_petrol_running_km: expenses.find(e => e.type === 'Petrol Running KM')?.amount || 0,
+      expense_toll: expenses.find(e => e.type === 'Toll')?.amount || 0,
+      expense_state_tax: expenses.find(e => e.type === 'State Tax')?.amount || 0,
+      expense_parking: expenses.find(e => e.type === 'Parking')?.amount || 0,
+      expense_food: expenses.find(e => e.type === 'Food')?.amount || 0,
+      expense_driver_advance: expenses.find(e => e.type === 'Driver Advance')?.amount || 0,
+      expense_other: expenses.find(e => e.type === 'Other')?.amount || 0,
+
+      profit: profit,
+      pending_recovery_amount: isOurVehicle ? pendingRecovery : 0,
+      payable_amount: payableToDriverOrVendor,
+      receivable_amount: extraCollectionAmount,
+      extra_collection_amount: extraCollectionAmount,
+      pending_extra_collection: pendingExtraCollection,
+      
+      review_status: review.status
+    };
+
+    try {
+      const { error } = await supabase.from('bookings').insert([bookingData]);
+      if (error) throw error;
+      
+      setShowModal(true);
+    } catch (err) {
+      setSaveError(err.message || "Failed to save booking. Please check database connection.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="dashboard-layout">
@@ -297,10 +383,10 @@ const BookingModule = () => {
                 <User size={18} /> Customer Details
               </div>
               <div className="form-grid form-grid-2">
-                <div className="form-group"><label>Customer Name</label><input type="text" className="form-control" placeholder="Full Name" /></div>
-                <div className="form-group"><label>Customer Mobile</label><input type="text" className="form-control" placeholder="+91 XXXXX XXXXX" /></div>
-                <div className="form-group"><label>Alternate Mobile</label><input type="text" className="form-control" placeholder="+91 XXXXX XXXXX" /></div>
-                <div className="form-group"><label>Email (Optional)</label><input type="email" className="form-control" placeholder="customer@email.com" /></div>
+                <div className="form-group"><label>Customer Name</label><input type="text" className="form-control" placeholder="Full Name" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} /></div>
+                <div className="form-group"><label>Customer Mobile</label><input type="text" className="form-control" placeholder="+91 XXXXX XXXXX" value={customer.mobile} onChange={e => setCustomer({...customer, mobile: e.target.value})} /></div>
+                <div className="form-group"><label>Alternate Mobile</label><input type="text" className="form-control" placeholder="+91 XXXXX XXXXX" value={customer.altMobile} onChange={e => setCustomer({...customer, altMobile: e.target.value})} /></div>
+                <div className="form-group"><label>Email (Optional)</label><input type="email" className="form-control" placeholder="customer@email.com" value={customer.email} onChange={e => setCustomer({...customer, email: e.target.value})} /></div>
               </div>
             </div>
 
@@ -325,13 +411,13 @@ const BookingModule = () => {
               </div>
 
               <div className="form-grid form-grid-3">
-                <div className="form-group"><label>Driver Name</label><input type="text" className="form-control" /></div>
-                <div className="form-group"><label>Driver Mobile</label><input type="text" className="form-control" /></div>
-                <div className="form-group"><label>Vehicle Number</label><input type="text" className="form-control" /></div>
-                <div className="form-group"><label>Vehicle Model</label><input type="text" className="form-control" /></div>
-                <div className="form-group"><label>Category</label><select className="form-control"><option>Sedan</option><option>SUV</option><option>Hatchback</option></select></div>
+                <div className="form-group"><label>Driver Name</label><input type="text" className="form-control" value={driver.name} onChange={e => setDriver({...driver, name: e.target.value})} /></div>
+                <div className="form-group"><label>Driver Mobile</label><input type="text" className="form-control" value={driver.mobile} onChange={e => setDriver({...driver, mobile: e.target.value})} /></div>
+                <div className="form-group"><label>Vehicle Number</label><input type="text" className="form-control" value={driver.vehicleNo} onChange={e => setDriver({...driver, vehicleNo: e.target.value})} /></div>
+                <div className="form-group"><label>Vehicle Model</label><input type="text" className="form-control" value={driver.model} onChange={e => setDriver({...driver, model: e.target.value})} /></div>
+                <div className="form-group"><label>Category</label><select className="form-control" value={driver.category} onChange={e => setDriver({...driver, category: e.target.value})}><option>Sedan</option><option>SUV</option><option>Hatchback</option></select></div>
                 {isOurVehicle && (
-                  <div className="form-group"><label>Fuel Type</label><select className="form-control"><option>Petrol</option><option>Diesel</option><option>CNG</option><option>EV</option></select></div>
+                  <div className="form-group"><label>Fuel Type</label><select className="form-control" value={driver.fuel} onChange={e => setDriver({...driver, fuel: e.target.value})}><option>Petrol</option><option>Diesel</option><option>CNG</option><option>EV</option></select></div>
                 )}
               </div>
             </div>
@@ -561,13 +647,18 @@ const BookingModule = () => {
               )}
 
               <div className="action-area" style={{display:'flex', flexDirection:'column', gap:'0.5rem', marginTop:'auto'}}>
+                {saveError && (
+                  <div style={{background:'#FEF2F2', border:'1px solid #FCA5A5', padding:'0.5rem', borderRadius:'6px', color:'#DC2626', fontSize:'0.8rem', fontWeight:'600'}}>
+                    ⚠️ Error: {saveError}
+                  </div>
+                )}
                 <div style={{display:'flex', gap:'0.5rem'}}>
                   <button className="btn-modal-secondary" style={{flex:1, borderRadius:'8px', padding:'0.75rem', fontSize:'0.85rem', cursor:'pointer'}}><Eye size={16}/> Preview Inv</button>
                   <button className="btn-modal-secondary" style={{flex:1, borderRadius:'8px', padding:'0.75rem', fontSize:'0.85rem', cursor:'pointer'}}><Eye size={16}/> Preview Quote</button>
                 </div>
-                <button className="btn-modal-secondary" style={{borderRadius:'8px', padding:'0.75rem', fontSize:'0.85rem', cursor:'pointer', fontWeight:'700'}} onClick={() => {}}><Edit3 size={16}/> Save Draft</button>
-                <button className="btn-save-booking" onClick={handleSave}>
-                  <Save size={20} /> Save Master Booking
+                <button className="btn-modal-secondary" style={{borderRadius:'8px', padding:'0.75rem', fontSize:'0.85rem', cursor:'pointer', fontWeight:'700'}} onClick={() => {}} disabled={isSaving}><Edit3 size={16}/> Save Draft</button>
+                <button className="btn-save-booking" onClick={handleSave} disabled={isSaving} style={{opacity: isSaving ? 0.7 : 1}}>
+                  <Save size={20} /> {isSaving ? 'Saving to Database...' : 'Save Master Booking'}
                 </button>
               </div>
             </div>

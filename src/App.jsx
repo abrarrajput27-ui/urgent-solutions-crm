@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import BookingModule from './components/BookingModule';
+import AllBookings from './components/AllBookings';
+import BookingDetail from './components/BookingDetail';
 import './index.css';
 
 function App() {
@@ -12,6 +14,8 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/bookings" element={<BookingModule />} />
+        <Route path="/bookings/:id" element={<BookingDetail />} />
+        <Route path="/all-bookings" element={<AllBookings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

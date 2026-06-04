@@ -14,7 +14,8 @@ import {
   BellRing, 
   Settings, 
   UserCog, 
-  LogOut 
+  LogOut,
+  PlusCircle
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -24,7 +25,8 @@ const Sidebar = () => {
   
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} />, active: location.pathname === '/dashboard' },
-    { name: 'Bookings', path: '/bookings', icon: <BookOpen size={18} />, active: location.pathname === '/bookings' },
+    { name: 'New Booking', path: '/bookings', icon: <PlusCircle size={18} />, active: location.pathname === '/bookings' },
+    { name: 'All Bookings', path: '/all-bookings', icon: <BookOpen size={18} />, active: location.pathname === '/all-bookings' },
     { name: 'Customers', icon: <Users size={18} /> },
     { name: 'Vendors', icon: <Briefcase size={18} /> },
     { name: 'Drivers', icon: <Car size={18} /> },

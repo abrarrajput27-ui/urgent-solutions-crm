@@ -559,3 +559,40 @@
   font-size: 0.65rem;
   color: var(--text-muted);
 }
+
+
+/* MOBILE RESPONSIVE MEDIA QUERIES */
+@media (max-width: 1024px) {
+  .row-1, .row-2, .row-3, .row-4, .row-5 { grid-template-columns: repeat(2, 1fr); height: auto; flex: none; }
+}
+@media (max-width: 768px) {
+  .sidebar { position: fixed; top: 0; left: -260px; height: 100vh; z-index: 1000; width: 260px; }
+  body.sidebar-open .sidebar { left: 0; }
+  .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999; }
+  body.sidebar-open .sidebar-overlay { display: block; }
+  .topnav { padding: 0 1rem; }
+  .search-bar { display: none; }
+  .profile-info { display: none; }
+  .nav-profile { padding-left: 0.5rem; border-left: none; }
+  .dashboard-content, .booking-content { overflow-y: auto; height: auto; flex: 1; }
+  .row-1, .row-2, .row-3, .row-4, .row-5 { grid-template-columns: 1fr; }
+  .chart-container { min-height: 250px; }
+  .recent-bookings-list { overflow: visible; }
+  .all-bookings-table-wrapper table, .all-bookings-table-wrapper thead, .all-bookings-table-wrapper tbody, .all-bookings-table-wrapper th, .all-bookings-table-wrapper td, .all-bookings-table-wrapper tr { display: block; }
+  .all-bookings-table-wrapper thead { display: none; }
+  .all-bookings-table-wrapper tr { background: white; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; border: 1px solid #E2E8F0; }
+  .all-bookings-table-wrapper td { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 !important; border-bottom: 1px solid #F1F5F9 !important; text-align: right; }
+  .all-bookings-table-wrapper td:last-child { border-bottom: none !important; }
+  .all-bookings-table-wrapper td::before { content: attr(data-label); font-weight: 600; color: #64748B; text-transform: uppercase; font-size: 0.75rem; text-align: left; margin-right: 1rem; }
+  .detail-grid-container { grid-template-columns: 1fr !important; }
+  .premium-header-wrapper { flex-direction: column; align-items: flex-start !important; gap: 1rem; }
+  .premium-header-wrapper > div:last-child { text-align: left !important; }
+  .quick-actions-wrapper { flex-direction: column; align-items: stretch !important; gap: 0.75rem; }
+  .quick-actions-wrapper .btn-group { flex-wrap: wrap; width: 100%; }
+  .quick-actions-wrapper .btn-group button { flex: 1; }
+}
+/* MOBILE ONLY ELEMENTS */
+.mobile-menu-btn, .mobile-close-btn { display: none; }
+@media (max-width: 768px) {
+  .mobile-menu-btn, .mobile-close-btn { display: flex; align-items: center; justify-content: center; }
+}

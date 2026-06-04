@@ -15,7 +15,8 @@ import {
   Settings, 
   UserCog, 
   LogOut,
-  PlusCircle
+  PlusCircle,
+  X
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -42,10 +43,12 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="sidebar">
-      
-      <div className="sidebar-brand">
-        <div className="sidebar-logo-svg">
+    <>
+      <div className="sidebar-overlay" onClick={() => document.body.classList.remove('sidebar-open')}></div>
+      <div className="sidebar">
+        
+        <div className="sidebar-brand">
+          <div className="sidebar-logo-svg">
           <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M50 0C22.4 0 0 22.4 0 50C0 85 50 120 50 120C50 120 100 85 100 50C100 22.4 77.6 0 50 0Z" fill="#F1F5F9"/>
             <circle cx="50" cy="45" r="30" fill="#0B192C"/>
@@ -56,6 +59,13 @@ const Sidebar = () => {
           <div className="sidebar-logo-title">Urgent<span>Taxis</span></div>
           <div className="sidebar-logo-subtitle">A Unit of Urgent Taxis</div>
         </div>
+        <button 
+          onClick={() => document.body.classList.remove('sidebar-open')}
+          style={{ background: 'none', border: 'none', color: '#94A3B8', marginLeft: 'auto', cursor: 'pointer' }}
+          className="mobile-close-btn"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       <div className="sidebar-menu">
@@ -66,6 +76,7 @@ const Sidebar = () => {
             onClick={() => {
               if (item.path) {
                 navigate(item.path);
+                document.body.classList.remove('sidebar-open');
               }
             }}
             style={{ cursor: item.path ? 'pointer' : 'default' }}
@@ -84,13 +95,17 @@ const Sidebar = () => {
       </div>
 
       <div className="sidebar-footer">
-        <button className="logout-btn" onClick={() => navigate('/')}>
+        <button className="logout-btn" onClick={() => {
+          navigate('/');
+          document.body.classList.remove('sidebar-open');
+        }}>
           <LogOut size={18} />
           <span>Logout</span>
         </button>
       </div>
       
     </div>
+    </>
   );
 };
 

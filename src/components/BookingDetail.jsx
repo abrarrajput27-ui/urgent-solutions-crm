@@ -143,11 +143,11 @@ const BookingDetail = () => {
         <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
           
           {/* Quick Actions Row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div className="quick-actions-wrapper" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <button onClick={() => navigate('/all-bookings')} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>
               <ArrowLeft size={16} /> Back to All Bookings
             </button>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div className="btn-group" style={{ display: 'flex', gap: '0.75rem' }}>
               <button onClick={() => setActionModal('Edit Booking')} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}><Edit3 size={16} /> Edit Booking</button>
               <button onClick={() => setActionModal('Generate Invoice')} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}><FileText size={16} /> Invoice</button>
               <button onClick={() => setActionModal('Generate Quotation')} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}><FileSpreadsheet size={16} /> Quotation</button>
@@ -156,7 +156,7 @@ const BookingDetail = () => {
           </div>
 
           {/* Premium Header Card */}
-          <div className="hide-on-print" style={{ background: 'linear-gradient(135deg, #0B192C 0%, #1a365d 100%)', borderRadius: '16px', padding: '2rem', color: 'white', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 10px 25px rgba(11,25,44,0.15)' }}>
+          <div className="hide-on-print premium-header-wrapper" style={{ background: 'linear-gradient(135deg, #0B192C 0%, #1a365d 100%)', borderRadius: '16px', padding: '2rem', color: 'white', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 10px 25px rgba(11,25,44,0.15)' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
                 <h1 style={{ fontSize: '2rem', margin: 0, fontWeight: '800', letterSpacing: '1px' }}>{booking?.booking_id}</h1>
@@ -177,7 +177,7 @@ const BookingDetail = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+          <div className="detail-grid-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
             
             {/* --- LEFT COLUMN --- */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

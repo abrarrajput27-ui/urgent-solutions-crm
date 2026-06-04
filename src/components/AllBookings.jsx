@@ -118,7 +118,7 @@ const AllBookings = () => {
                 Error fetching data: {error}
               </div>
             ) : (
-              <div style={{ overflowX: 'auto' }}>
+              <div className="all-bookings-table-wrapper" style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
                   <thead style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
                     <tr>
@@ -148,22 +148,22 @@ const AllBookings = () => {
                     ) : (
                       filteredBookings.map((b) => (
                         <tr key={b.id || b.booking_id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s', ':hover': { background: '#F8FAFC' } }}>
-                          <td style={{ padding: '1rem', fontWeight: '600', color: '#0B192C' }}>{b.booking_id}</td>
-                          <td style={{ padding: '1rem', color: '#64748B' }}>{b.booking_date}</td>
-                          <td style={{ padding: '1rem', fontWeight: '500' }}>{b.customer_name || 'N/A'}</td>
-                          <td style={{ padding: '1rem', color: '#64748B' }}>{b.customer_mobile || 'N/A'}</td>
-                          <td style={{ padding: '1rem', color: '#64748B', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.route || 'N/A'}</td>
-                          <td style={{ padding: '1rem' }}>
+                          <td data-label="Booking ID" style={{ padding: '1rem', fontWeight: '600', color: '#0B192C' }}>{b.booking_id}</td>
+                          <td data-label="Date" style={{ padding: '1rem', color: '#64748B' }}>{b.booking_date}</td>
+                          <td data-label="Customer" style={{ padding: '1rem', fontWeight: '500' }}>{b.customer_name || 'N/A'}</td>
+                          <td data-label="Mobile" style={{ padding: '1rem', color: '#64748B' }}>{b.customer_mobile || 'N/A'}</td>
+                          <td data-label="Route" style={{ padding: '1rem', color: '#64748B', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.route || 'N/A'}</td>
+                          <td data-label="Source" style={{ padding: '1rem' }}>
                             <span style={{ background: '#E0E7FF', color: '#4338CA', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
                               {b.booking_source}
                             </span>
                           </td>
-                          <td style={{ padding: '1rem', color: '#64748B' }}>{b.service_vehicle_type}</td>
-                          <td style={{ padding: '1rem', fontWeight: '600' }}>₹{b.my_amount?.toLocaleString() || 0}</td>
-                          <td style={{ padding: '1rem', color: '#DC2626' }}>₹{b.total_trip_expenses?.toLocaleString() || 0}</td>
-                          <td style={{ padding: '1rem', color: '#16A34A', fontWeight: '700' }}>₹{b.profit?.toLocaleString() || 0}</td>
-                          <td style={{ padding: '1rem', color: '#EA580C' }}>{b.pending_recovery_amount > 0 ? `₹${b.pending_recovery_amount.toLocaleString()}` : '-'}</td>
-                          <td style={{ padding: '1rem' }}>
+                          <td data-label="Vehicle Type" style={{ padding: '1rem', color: '#64748B' }}>{b.service_vehicle_type}</td>
+                          <td data-label="My Amt" style={{ padding: '1rem', fontWeight: '600' }}>₹{b.my_amount?.toLocaleString() || 0}</td>
+                          <td data-label="Expenses" style={{ padding: '1rem', color: '#DC2626' }}>₹{b.total_trip_expenses?.toLocaleString() || 0}</td>
+                          <td data-label="Profit" style={{ padding: '1rem', color: '#16A34A', fontWeight: '700' }}>₹{b.profit?.toLocaleString() || 0}</td>
+                          <td data-label="Recovery" style={{ padding: '1rem', color: '#EA580C' }}>{b.pending_recovery_amount > 0 ? `₹${b.pending_recovery_amount.toLocaleString()}` : '-'}</td>
+                          <td data-label="Status" style={{ padding: '1rem' }}>
                             <span style={{ 
                               background: b.booking_status === 'Confirmed' ? '#DCFCE7' : b.booking_status === 'Completed' ? '#DBEAFE' : b.booking_status === 'Cancelled' ? '#FEE2E2' : '#FEF3C7', 
                               color: b.booking_status === 'Confirmed' ? '#166534' : b.booking_status === 'Completed' ? '#1E40AF' : b.booking_status === 'Cancelled' ? '#991B1B' : '#92400E', 
@@ -172,10 +172,10 @@ const AllBookings = () => {
                               {b.booking_status || 'Pending'}
                             </span>
                           </td>
-                          <td style={{ padding: '1rem', color: '#94A3B8', fontSize: '0.75rem' }}>
+                          <td data-label="Created At" style={{ padding: '1rem', color: '#94A3B8', fontSize: '0.75rem' }}>
                             {new Date(b.created_at).toLocaleDateString()}
                           </td>
-                          <td style={{ padding: '1rem', textAlign: 'center' }}>
+                          <td data-label="Action" style={{ padding: '1rem', textAlign: 'center' }}>
                             <button 
                               onClick={() => navigate(`/bookings/${b.id}`)}
                               style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 

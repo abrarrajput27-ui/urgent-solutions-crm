@@ -1,13 +1,22 @@
 import React from 'react';
-import { Search, Bell, Wallet, CalendarDays } from 'lucide-react';
+import { Search, Bell, Wallet, CalendarDays, Menu } from 'lucide-react';
 
 const TopNav = () => {
   return (
     <div className="topnav">
       
-      <div className="topnav-left">
-        <div className="topnav-title">Dashboard</div>
-        <div className="topnav-subtitle">Welcome back, <span>Admin</span> 👋</div>
+      <div className="topnav-left" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem' }}>
+        <button 
+          className="mobile-menu-btn" 
+          onClick={() => document.body.classList.toggle('sidebar-open')}
+          style={{ background: 'none', border: 'none', color: 'var(--text-dark)', cursor: 'pointer' }}
+        >
+          <Menu size={24} />
+        </button>
+        <div>
+          <div className="topnav-title">Dashboard</div>
+          <div className="topnav-subtitle">Welcome back, <span>Admin</span> 👋</div>
+        </div>
       </div>
 
       <div className="topnav-right">

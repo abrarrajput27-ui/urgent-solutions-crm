@@ -118,7 +118,8 @@ const AllBookings = () => {
                 Error fetching data: {error}
               </div>
             ) : (
-              <div className="all-bookings-table-wrapper" style={{ overflowX: 'auto' }}>
+              <>
+              <div className="all-bookings-table-wrapper all-bookings-desktop" style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
                   <thead style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
                     <tr>
@@ -179,9 +180,10 @@ const AllBookings = () => {
                             <button 
                               onClick={() => navigate(`/bookings/${b.id}`)}
                               style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
-                              title="View Booking"
+                              onMouseOver={(e) => e.currentTarget.style.color = '#3B82F6'} 
+                              onMouseOut={(e) => e.currentTarget.style.color = '#64748B'}
                             >
-                              <Eye size={18} />
+                              <FileText size={18} />
                             </button>
                           </td>
                         </tr>
@@ -190,6 +192,68 @@ const AllBookings = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Card View */}
+              <div className="all-bookings-mobile">
+                {filteredBookings.length === 0 ? (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: '#64748B' }}>
+                    No bookings found matching your search.
+                  </div>
+                ) : (
+                  filteredBookings.map((b) => (
+                    <div key={b.id || b.booking_id} style={{ background: 'white', borderRadius: '12px', padding: '1rem', border: '1px solid #E2E8F0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #F1F5F9', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
+                        <div>
+                          <div style={{ fontWeight: '700', color: '#0B192C', fontSize: '1.1rem' }}>{b.booking_id}</div>
+                          <div style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '0.2rem' }}>{b.booking_date}</div>
+                        </div>
+                        <span style={{ 
+                          background: b.booking_status === 'Confirmed' ? '#DCFCE7' : b.booking_status === 'Completed' ? '#DBEAFE' : b.booking_status === 'Cancelled' ? '#FEE2E2' : '#FEF3C7', 
+                          color: b.booking_status === 'Confirmed' ? '#166534' : b.booking_status === 'Completed' ? '#1E40AF' : b.booking_status === 'Cancelled' ? '#991B1B' : '#92400E', 
+                          padding: '0.25rem 0.6rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700' 
+                        }}>
+                          {b.booking_status || 'Pending'}
+                        </span>
+                      </div>
+                      
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                        <div>
+                          <div style={{ color: '#94A3B8', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: '600' }}>Customer</div>
+                          <div style={{ fontWeight: '600', color: '#334155' }}>{b.customer_name || 'N/A'}</div>
+                          <div style={{ color: '#64748B', fontSize: '0.8rem' }}>{b.customer_mobile}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ color: '#94A3B8', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: '600' }}>Route</div>
+                          <div style={{ fontWeight: '600', color: '#334155', wordBreak: 'break-word' }}>{b.route || 'N/A'}</div>
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#F8FAFC', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', textAlign: 'center' }}>
+                        <div>
+                          <div style={{ color: '#94A3B8', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: '700' }}>My Amt</div>
+                          <div style={{ fontWeight: '700', color: '#0F172A' }}>₹{b.my_amount?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={{ borderLeft: '1px solid #E2E8F0', borderRight: '1px solid #E2E8F0' }}>
+                          <div style={{ color: '#94A3B8', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: '700' }}>Expenses</div>
+                          <div style={{ fontWeight: '700', color: '#DC2626' }}>₹{b.total_trip_expenses?.toLocaleString() || 0}</div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#94A3B8', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: '700' }}>Profit</div>
+                          <div style={{ fontWeight: '800', color: '#16A34A' }}>₹{b.profit?.toLocaleString() || 0}</div>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={() => navigate(`/bookings/${b.id}`)}
+                        style={{ width: '100%', background: '#0B192C', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                      >
+                        <FileText size={16} /> View Full Details
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+              </>
             )}
           </div>
         </div>

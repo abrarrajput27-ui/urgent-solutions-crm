@@ -620,3 +620,9 @@
   .all-bookings-mobile { display: none !important; }
   .all-bookings-desktop { display: block; }
 }
+
+/* ALL BOOKINGS FILTERS RESPONSIVE */
+@media (max-width: 768px) {
+  .filters-container { flex-direction: column !important; }
+  .filter-item { width: 100% !important; flex: none !important; }
+}

@@ -399,10 +399,11 @@
 }
 
 @media (max-width: 768px) {
-  .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr; }
+  .form-grid, .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr !important; }
   .form-section { padding: 1rem; }
   .modal-content { width: 95%; padding: 1.5rem; }
   .btn-modal { padding: 0.6rem; font-size: 0.8rem; }
-  .expense-row { grid-template-columns: 1fr 1fr auto; }
+  .expense-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  .expense-row .btn-remove-expense { width: 100%; height: 40px; margin-top: 0.25rem; }
 }
 

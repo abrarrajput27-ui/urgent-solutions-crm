@@ -62,8 +62,8 @@ const AllBookings = () => {
           </div>
 
           {/* Filters Bar */}
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: 'white', padding: '1rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-            <div style={{ flex: 1, position: 'relative' }}>
+          <div className="filters-container" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: 'white', padding: '1rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div className="filter-item search-item" style={{ flex: 1, position: 'relative' }}>
               <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
               <input 
                 type="text" 
@@ -74,7 +74,7 @@ const AllBookings = () => {
               />
             </div>
             
-            <div style={{ width: '200px' }}>
+            <div className="filter-item" style={{ width: '200px' }}>
               <select 
                 value={sourceFilter}
                 onChange={e => setSourceFilter(e.target.value)}
@@ -90,7 +90,7 @@ const AllBookings = () => {
               </select>
             </div>
 
-            <div style={{ width: '200px' }}>
+            <div className="filter-item" style={{ width: '200px' }}>
               <select 
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}

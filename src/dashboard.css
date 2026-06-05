@@ -596,3 +596,20 @@
 @media (max-width: 768px) {
   .mobile-menu-btn, .mobile-close-btn { display: flex; align-items: center; justify-content: center; }
 }
+
+/* EXTRA STRICT MOBILE OVERFLOW PROTECTIONS */
+@media (max-width: 768px) {
+  * { max-width: 100%; box-sizing: border-box; word-wrap: break-word; }
+  .dashboard-layout, .main-content, .booking-content { width: 100%; max-width: 100vw; overflow-x: hidden; }
+  .card, .form-section, .live-panel { width: 100%; max-width: 100%; overflow: hidden; }
+  .topnav { width: 100%; max-width: 100%; overflow: hidden; white-space: normal; height: auto; min-height: 60px; padding: 0.5rem 1rem; }
+  .topnav-left { flex-wrap: wrap; width: 100%; max-width: 100%; overflow: hidden; }
+  .topnav-title, .topnav-subtitle { white-space: normal; word-break: break-word; max-width: 100%; }
+  .kpi-card { flex-wrap: wrap; text-align: center; justify-content: center; }
+  .all-bookings-table-wrapper td { flex-wrap: wrap; word-break: break-word; text-align: right; max-width: 100%; }
+  .premium-header-wrapper { padding: 1.5rem !important; }
+  .premium-header-wrapper h1 { font-size: 1.5rem !important; word-break: break-all; white-space: normal; max-width: 100%; }
+  .detail-grid-container > div { width: 100%; max-width: 100%; overflow: hidden; }
+  .quick-actions-wrapper { max-width: 100%; }
+  .dashboard-content { padding: 0.5rem; max-width: 100vw; overflow-x: hidden; }
+}

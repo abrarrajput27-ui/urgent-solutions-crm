@@ -140,7 +140,7 @@ const BookingDetail = () => {
       <div className="main-content">
         <TopNav />
         
-        <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+        <div className="dashboard-content" style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
           
           {/* Quick Actions Row */}
           <div className="quick-actions-wrapper" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>

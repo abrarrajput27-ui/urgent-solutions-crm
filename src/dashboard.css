@@ -626,3 +626,9 @@
   .filters-container { flex-direction: column !important; }
   .filter-item { width: 100% !important; flex: none !important; }
 }
+
+/* MOBILE NATIVE SCROLL FIX */
+@media (max-width: 768px) {
+  .dashboard-layout, .main-content { height: auto !important; min-height: 100vh !important; min-height: 100dvh !important; overflow: visible !important; }
+  .dashboard-content { height: auto !important; overflow: visible !important; }
+}

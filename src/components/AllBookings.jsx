@@ -56,7 +56,7 @@ const AllBookings = () => {
       <div className="main-content">
         <TopNav />
         
-        <div style={{ padding: '1.5rem 2rem' }}>
+        <div className="dashboard-content" style={{ padding: '1.5rem 2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.5rem', color: 'var(--primary-navy)', margin: 0 }}>All Bookings</h2>
           </div>

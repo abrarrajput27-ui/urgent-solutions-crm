@@ -437,3 +437,8 @@ body, html {
     margin-top: 2rem;
   }
 }
+
+/* MOBILE NATIVE SCROLL FIX */
+@media (max-width: 768px) {
+  body, html, #root { height: auto !important; min-height: 100vh !important; min-height: 100dvh !important; overflow-y: auto !important; }
+}

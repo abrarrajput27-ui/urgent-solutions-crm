@@ -15,6 +15,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/bookings" element={<BookingModule />} />
         <Route path="/bookings/:id" element={<BookingDetail />} />
+        <Route path="/bookings/:id/edit" element={<BookingModule />} />
         <Route path="/all-bookings" element={<AllBookings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

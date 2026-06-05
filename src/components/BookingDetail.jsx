@@ -7,7 +7,7 @@ import {
   ArrowLeft, Edit3, FileText, Printer, FileSpreadsheet, MapPin, 
   Calendar, User, Phone, Mail, Car, Fuel, Briefcase, Wallet, 
   CheckCircle2, TrendingUp, Calculator, Loader2, Navigation,
-  AlertCircle, ShieldAlert, Clock, CheckCircle, Circle, CreditCard
+  AlertCircle, ShieldAlert, Clock, CheckCircle, Circle, CreditCard, Trash2
 } from 'lucide-react';
 import '../dashboard.css';
 
@@ -39,6 +39,28 @@ const BookingDetail = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateStatus = async (newStatus) => {
+    try {
+      const { error } = await supabase.from('bookings').update({ booking_status: newStatus }).eq('id', id);
+      if (error) throw error;
+      setBooking({ ...booking, booking_status: newStatus });
+    } catch (err) {
+      alert("Failed to update status: " + err.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this booking? This action cannot be undone.")) {
+      try {
+        const { error } = await supabase.from('bookings').delete().eq('id', id);
+        if (error) throw error;
+        navigate('/all-bookings');
+      } catch (err) {
+        alert("Failed to delete booking: " + err.message);
+      }
     }
   };
 
@@ -147,8 +169,9 @@ const BookingDetail = () => {
             <button onClick={() => navigate('/all-bookings')} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>
               <ArrowLeft size={16} /> Back to All Bookings
             </button>
-            <div className="btn-group" style={{ display: 'flex', gap: '0.75rem' }}>
-              <button onClick={() => setActionModal('Edit Booking')} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}><Edit3 size={16} /> Edit Booking</button>
+            <div className="btn-group hide-on-print" style={{ display: 'flex', gap: '0.75rem' }}>
+              <button onClick={() => navigate(`/bookings/${id}/edit`)} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}><Edit3 size={16} /> Edit Booking</button>
+              <button onClick={handleDelete} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', color: '#DC2626', borderColor: '#FCA5A5', background: '#FEF2F2' }}><Trash2 size={16} /> Delete</button>
               <button onClick={() => setActionModal('Generate Invoice')} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}><FileText size={16} /> Invoice</button>
               <button onClick={() => setActionModal('Generate Quotation')} className="btn-modal-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}><FileSpreadsheet size={16} /> Quotation</button>
               <button onClick={() => window.print()} className="btn-modal-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}><Printer size={16} /> Print</button>
@@ -162,7 +185,20 @@ const BookingDetail = () => {
                 <h1 style={{ fontSize: '2rem', margin: 0, fontWeight: '800', letterSpacing: '1px' }}>{booking?.booking_id}</h1>
                 <span style={{ background: statusStyle.bg, color: statusStyle.text, padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: statusStyle.text }}></span>
-                  {booking?.booking_status || 'Pending'}
+                  <select 
+                    value={booking?.booking_status || 'Pending'} 
+                    onChange={(e) => updateStatus(e.target.value)}
+                    style={{ background: 'transparent', border: 'none', color: 'inherit', fontWeight: 'inherit', outline: 'none', cursor: 'pointer', appearance: 'none' }}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Assigned">Assigned</option>
+                    <option value="Started">Started</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="No Show">No Show</option>
+                  </select>
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '1.5rem', color: '#94A3B8', fontSize: '0.95rem', fontWeight: '500' }}>

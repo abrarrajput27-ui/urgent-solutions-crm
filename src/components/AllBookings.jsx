@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import TopNav from './TopNav';
 import { supabase } from '../lib/supabaseClient';
-import { Search, Filter, Eye, Loader2, FileText } from 'lucide-react';
+import { Search, Filter, Eye, Loader2, FileText, Download, Trash2, Edit3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import '../dashboard.css';
 
@@ -50,6 +50,49 @@ const AllBookings = () => {
     return matchesSearch && matchesSource && matchesStatus;
   });
 
+  const exportToCSV = () => {
+    if (filteredBookings.length === 0) return;
+    
+    const headers = ['Booking ID', 'Date', 'Customer Name', 'Mobile', 'Source', 'Vehicle Type', 'My Amount', 'Expenses', 'Profit', 'Status'];
+    const csvRows = [headers.join(',')];
+    
+    filteredBookings.forEach(b => {
+      const row = [
+        b.booking_id,
+        b.booking_date,
+        `"${b.customer_name || ''}"`,
+        b.customer_mobile,
+        b.booking_source,
+        b.service_vehicle_type,
+        b.my_amount || 0,
+        b.total_trip_expenses || 0,
+        b.profit || 0,
+        b.booking_status || 'Pending'
+      ];
+      csvRows.push(row.join(','));
+    });
+    
+    const csvString = csvRows.join('\\n');
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookings_export_${new Date().getTime()}.csv`;
+    a.click();
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this booking? This action cannot be undone.")) {
+      try {
+        const { error } = await supabase.from('bookings').delete().eq('id', id);
+        if (error) throw error;
+        setBookings(bookings.filter(b => b.id !== id));
+      } catch (err) {
+        alert("Failed to delete booking: " + err.message);
+      }
+    }
+  };
+
   return (
     <div className="dashboard-layout">
       <Sidebar />
@@ -59,6 +102,9 @@ const AllBookings = () => {
         <div className="dashboard-content" style={{ padding: '1.5rem 2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.5rem', color: 'var(--primary-navy)', margin: 0 }}>All Bookings</h2>
+            <button onClick={exportToCSV} className="btn-modal-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>
+              <Download size={16} /> Export to CSV
+            </button>
           </div>
 
           {/* Filters Bar */}
@@ -177,14 +223,29 @@ const AllBookings = () => {
                             {new Date(b.created_at).toLocaleDateString()}
                           </td>
                           <td data-label="Action" style={{ padding: '1rem', textAlign: 'center' }}>
-                            <button 
-                              onClick={() => navigate(`/bookings/${b.id}`)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
-                              onMouseOver={(e) => e.currentTarget.style.color = '#3B82F6'} 
-                              onMouseOut={(e) => e.currentTarget.style.color = '#64748B'}
-                            >
-                              <FileText size={18} />
-                            </button>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                              <button 
+                                onClick={() => navigate(`/bookings/${b.id}`)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
+                                title="View"
+                              >
+                                <Eye size={18} />
+                              </button>
+                              <button 
+                                onClick={() => navigate(`/bookings/${b.id}/edit`)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
+                                title="Edit"
+                              >
+                                <Edit3 size={18} />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete(b.id)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', transition: 'color 0.2s' }} 
+                                title="Delete"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -243,12 +304,26 @@ const AllBookings = () => {
                         </div>
                       </div>
 
-                      <button 
-                        onClick={() => navigate(`/bookings/${b.id}`)}
-                        style={{ width: '100%', background: '#0B192C', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
-                      >
-                        <FileText size={16} /> View Full Details
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button 
+                          onClick={() => navigate(`/bookings/${b.id}`)}
+                          style={{ flex: 1, background: '#0B192C', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                        >
+                          <Eye size={16} /> View
+                        </button>
+                        <button 
+                          onClick={() => navigate(`/bookings/${b.id}/edit`)}
+                          style={{ flex: 1, background: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                        >
+                          <Edit3 size={16} /> Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(b.id)}
+                          style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FCA5A5', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}

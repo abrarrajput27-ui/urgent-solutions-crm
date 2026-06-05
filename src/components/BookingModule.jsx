@@ -8,8 +8,14 @@ import {
   Plus, Trash2, Save, FileSpreadsheet, PlusCircle, ArrowRight, Eye, Edit3, ShieldAlert
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-
+import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 const BookingModule = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEditMode = Boolean(id);
+  const [bookingIdLabel, setBookingIdLabel] = useState(`UT-2026-${Date.now()}`);
+
   // 1 & 2. Source and Vehicle Type
   const [bookingSource, setBookingSource] = useState('Direct');
   const [serviceVehicleType, setServiceVehicleType] = useState('Our Vehicle');
@@ -56,6 +62,97 @@ const BookingModule = () => {
     { id: 9, type: 'Other', amount: 0 }
   ]);
   const [showManualExpense, setShowManualExpense] = useState(false);
+
+  useEffect(() => {
+    if (isEditMode) {
+      fetchBookingDetails();
+    }
+  }, [id]);
+
+  const fetchBookingDetails = async () => {
+    try {
+      const { data, error } = await supabase.from('bookings').select('*').eq('id', id).single();
+      if (error) throw error;
+      if (data) {
+        setBookingIdLabel(data.booking_id);
+        setBookingSource(data.booking_source || 'Direct');
+        setServiceVehicleType(data.service_vehicle_type || 'Our Vehicle');
+        setDriverOwnership(data.driver_ownership || 'Our Driver');
+        setVehicleOwnership(data.vehicle_ownership || 'Our Vehicle');
+        
+        setBasic({
+          status: data.booking_status || 'Pending',
+          date: data.booking_date || '',
+          pickupDate: data.pickup_datetime || '',
+          tripType: data.trip_type || 'One-Way Outstation',
+          pickup: data.pickup_location || '',
+          drop: data.drop_location || '',
+          route: data.route || '',
+          days: data.number_of_days || 1,
+          notes: data.notes || '',
+          stops: []
+        });
+
+        setCustomer({
+          name: data.customer_name || '',
+          mobile: data.customer_mobile || '',
+          altMobile: data.alternate_mobile || '',
+          email: data.customer_email || ''
+        });
+
+        setVendor({
+          name: data.vendor_name || '',
+          mobile: data.vendor_mobile || '',
+          panelOwner: data.panel_owner || 'Abrar',
+          platformName: data.platform_name || ''
+        });
+
+        setDriver({
+          name: data.driver_name || '',
+          mobile: data.driver_mobile || '',
+          vehicleNo: data.vehicle_number || '',
+          model: data.vehicle_model || '',
+          category: data.vehicle_category || 'Sedan',
+          fuel: data.fuel_type || 'Petrol'
+        });
+
+        setFin({
+          myAmount: data.my_amount || 0,
+          vendorOrDriverAmount: data.vendor_amount || data.driver_amount || 0,
+          commissionPercentage: data.commission_percentage || 0,
+          commissionAmount: data.commission_amount || 0,
+          totalBookingAmount: data.total_booking_amount || 0,
+          vendorAcceptedAmount: 0,
+          vendorFinalAmount: 0
+        });
+
+        setCollection({
+          doneBy: data.collection_done_by || 'Our Driver',
+          mode: data.collection_mode || 'Mixed',
+          cash: data.cash_collection_amount || 0,
+          paytm: data.paytm_collection_amount || 0,
+          upi: data.upi_collection_amount || 0,
+          bank: data.bank_collection_amount || 0
+        });
+        
+        // Expenses logic
+        const newExpenses = [
+          { id: 1, type: 'CNG', amount: data.expense_cng || 0 },
+          { id: 2, type: 'Petrol Filled', amount: data.expense_petrol_filled || 0 },
+          { id: 3, type: 'Petrol Running KM', amount: data.expense_petrol_running_km || 0 },
+          { id: 4, type: 'Toll', amount: data.expense_toll || 0 },
+          { id: 5, type: 'State Tax', amount: data.expense_state_tax || 0 },
+          { id: 6, type: 'Parking', amount: data.expense_parking || 0 },
+          { id: 7, type: 'Food', amount: data.expense_food || 0 },
+          { id: 8, type: 'Driver Advance', amount: data.expense_driver_advance || 0 },
+          { id: 9, type: 'Other', amount: data.expense_other || 0 }
+        ];
+        setExpenses(newExpenses);
+      }
+    } catch (err) {
+      setSaveError("Failed to load booking details.");
+    }
+  };
 
   const [review, setReview] = useState({ status: 'Pending', reminderDate: '', type: 'Payment', notes: '' });
   const [showModal, setShowModal] = useState(false);
@@ -133,8 +230,14 @@ const BookingModule = () => {
     setIsSaving(true);
     setSaveError(null);
 
+    if (!customer.name || !customer.mobile || !basic.pickup || !basic.drop || !bookingSource || !serviceVehicleType || !fin.myAmount) {
+      setSaveError("Validation Error: Please fill all required fields (Customer Name, Mobile, Pickup, Drop, Source, Service Type, My Amount).");
+      setIsSaving(false);
+      return;
+    }
+
     const bookingData = {
-      booking_id: `UT-2026-${Date.now()}`,
+      booking_id: bookingIdLabel,
       booking_source: bookingSource,
       service_vehicle_type: serviceVehicleType,
       driver_ownership: driverOwnership,
@@ -203,7 +306,14 @@ const BookingModule = () => {
     };
 
     try {
-      const { error } = await supabase.from('bookings').insert([bookingData]);
+      let error;
+      if (isEditMode) {
+        const { error: updateError } = await supabase.from('bookings').update(bookingData).eq('id', id);
+        error = updateError;
+      } else {
+        const { error: insertError } = await supabase.from('bookings').insert([bookingData]);
+        error = insertError;
+      }
       if (error) throw error;
       
       setShowModal(true);
@@ -314,7 +424,7 @@ const BookingModule = () => {
                 <FileText size={18} /> Basic Booking Details
               </div>
               <div className="form-grid form-grid-3">
-                <div className="form-group"><label>Booking ID</label><input type="text" className="form-control" value="BK-8092" disabled /></div>
+                <div className="form-group"><label>Booking ID</label><input type="text" className="form-control" value={bookingIdLabel} disabled /></div>
                 <div className="form-group">
                   <label>Booking Status</label>
                   <select className="form-control" style={{fontWeight:'700', color: basic.status==='Confirmed' ? '#00C853' : '#0044FF'}} value={basic.status} onChange={e => setBasic({...basic, status: e.target.value})}>
@@ -658,7 +768,7 @@ const BookingModule = () => {
                 </div>
                 <button className="btn-modal-secondary" style={{borderRadius:'8px', padding:'0.75rem', fontSize:'0.85rem', cursor:'pointer', fontWeight:'700'}} onClick={() => {}} disabled={isSaving}><Edit3 size={16}/> Save Draft</button>
                 <button className="btn-save-booking" onClick={handleSave} disabled={isSaving} style={{opacity: isSaving ? 0.7 : 1}}>
-                  <Save size={20} /> {isSaving ? 'Saving to Database...' : 'Save Master Booking'}
+                  <Save size={20} /> {isSaving ? 'Saving...' : (isEditMode ? 'Update Booking' : 'Save Master Booking')}
                 </button>
               </div>
             </div>
@@ -674,12 +784,12 @@ const BookingModule = () => {
             <div className="modal-icon-wrapper">
               <CheckCircle2 size={36} />
             </div>
-            <div className="modal-title">Booking Saved Successfully!</div>
-            <div className="modal-subtitle">BK-8092 has been recorded and relevant ledgers are updated.</div>
+            <div className="modal-title">Booking {isEditMode ? 'Updated' : 'Saved'} Successfully!</div>
+            <div className="modal-subtitle">{bookingIdLabel} has been successfully {isEditMode ? 'updated' : 'recorded'}.</div>
             
             <div className="modal-actions">
               <button className="btn-modal btn-modal-primary" onClick={() => setShowModal(false)}><PlusCircle size={16} /> Save & New Booking</button>
-              <button className="btn-modal btn-modal-secondary" onClick={() => setShowModal(false)}><FileText size={16} /> Save & View Booking</button>
+              <button className="btn-modal btn-modal-secondary" onClick={() => navigate('/all-bookings')}><FileText size={16} /> View All Bookings</button>
               <button className="btn-modal btn-modal-secondary" onClick={() => setShowModal(false)}><ArrowRight size={16} /> Save & Generate Invoice</button>
               <button className="btn-modal btn-modal-secondary" onClick={() => setShowModal(false)}><FileSpreadsheet size={16} /> Save & Generate Quotation</button>
             </div>

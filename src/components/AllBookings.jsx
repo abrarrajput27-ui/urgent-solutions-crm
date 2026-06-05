@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import TopNav from './TopNav';
 import { supabase } from '../lib/supabaseClient';
-import { Search, Filter, Eye, Loader2 } from 'lucide-react';
+import { Search, Filter, Eye, Loader2, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import '../dashboard.css';
 

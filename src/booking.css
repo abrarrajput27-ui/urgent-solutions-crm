@@ -406,17 +406,3 @@
   .expense-row { grid-template-columns: 1fr 1fr auto; }
 }
 
-/* EXTRA STRICT MOBILE OVERFLOW PROTECTIONS */
-@media (max-width: 768px) {
-  .booking-content { padding: 0.5rem; max-width: 100vw; overflow-x: hidden; }
-  .booking-form-col { width: 100%; max-width: 100vw; overflow-x: hidden; padding-right: 0; }
-  .form-section { max-width: 100vw; overflow-x: hidden; }
-  .form-grid, .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr; width: 100%; max-width: 100%; }
-  .booking-panel-col { width: 100%; max-width: 100vw; overflow-x: hidden; }
-  .live-panel { max-width: 100vw; overflow-x: hidden; }
-  .metric-row { flex-wrap: wrap; word-break: break-word; }
-  .ledger-list { grid-template-columns: 1fr; width: 100%; }
-  .ledger-item { white-space: normal; word-break: break-word; }
-  .btn-save-booking { white-space: normal; height: auto; padding: 1rem 0.5rem; }
-  .profit-value { font-size: 1.5rem; }
-}

@@ -28,7 +28,7 @@ const Sidebar = () => {
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} />, active: location.pathname === '/dashboard' },
     { name: 'New Booking', path: '/bookings', icon: <PlusCircle size={18} />, active: location.pathname === '/bookings' },
     { name: 'All Bookings', path: '/all-bookings', icon: <BookOpen size={18} />, active: location.pathname === '/all-bookings' },
-    { name: 'Customers', icon: <Users size={18} /> },
+    { name: 'Customers', path: '/customers', icon: <Users size={18} />, active: location.pathname === '/customers' },
     { name: 'Vendors', icon: <Briefcase size={18} /> },
     { name: 'Drivers', icon: <Car size={18} /> },
     { name: 'Recovery Ledger', icon: <Wallet size={18} /> },

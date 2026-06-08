@@ -165,6 +165,28 @@ const BookingModule = () => {
   const addExpense = () => setExpenses([...expenses, { id: Date.now(), type: 'New Expense', amount: 0 }]);
   const removeExpense = (id) => setExpenses(expenses.filter(ex => ex.id !== id));
 
+  const fetchCustomerByMobile = async (e) => {
+    if (e) e.preventDefault();
+    if (!customer.mobile) return;
+    
+    try {
+      const { data, error } = await supabase.from('customers').select('*').eq('mobile', customer.mobile).single();
+      if (data) {
+        setCustomer({
+          ...customer,
+          name: data.name || '',
+          altMobile: data.alternate_mobile || '',
+          email: data.email || ''
+        });
+        alert("Customer found and auto-filled.");
+      } else {
+        alert("No existing customer found with this mobile.");
+      }
+    } catch (err) {
+      alert("Error fetching customer or not found.");
+    }
+  };
+
   // --- CALCULATIONS ---
   const isOurVehicle = serviceVehicleType === 'Our Vehicle';
   
@@ -315,6 +337,35 @@ const BookingModule = () => {
         error = insertError;
       }
       if (error) throw error;
+
+      // Upsert Customer logic
+      if (!isEditMode) { // Only increment counts if it's a new booking
+        try {
+          const { data: existingCust } = await supabase.from('customers').select('*').eq('mobile', customer.mobile).single();
+          if (existingCust) {
+            await supabase.from('customers').update({
+              name: customer.name,
+              alternate_mobile: customer.altMobile,
+              email: customer.email,
+              total_bookings: (existingCust.total_bookings || 0) + 1,
+              total_revenue: Number(existingCust.total_revenue || 0) + Number(fin.myAmount || 0),
+              last_trip_date: new Date().toISOString()
+            }).eq('id', existingCust.id);
+          } else {
+            await supabase.from('customers').insert([{
+              name: customer.name,
+              mobile: customer.mobile,
+              alternate_mobile: customer.altMobile,
+              email: customer.email,
+              total_bookings: 1,
+              total_revenue: Number(fin.myAmount || 0),
+              last_trip_date: new Date().toISOString()
+            }]);
+          }
+        } catch (custErr) {
+          console.error("Failed to upsert customer", custErr);
+        }
+      }
       
       setShowModal(true);
     } catch (err) {
@@ -494,7 +545,13 @@ const BookingModule = () => {
               </div>
               <div className="form-grid form-grid-2">
                 <div className="form-group"><label>Customer Name</label><input type="text" className="form-control" placeholder="Full Name" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} /></div>
-                <div className="form-group"><label>Customer Mobile</label><input type="text" className="form-control" placeholder="+91 XXXXX XXXXX" value={customer.mobile} onChange={e => setCustomer({...customer, mobile: e.target.value})} /></div>
+                <div className="form-group">
+                  <label>Customer Mobile</label>
+                  <div style={{display:'flex', gap:'0.5rem'}}>
+                    <input type="text" className="form-control" placeholder="+91 XXXXX XXXXX" value={customer.mobile} onChange={e => setCustomer({...customer, mobile: e.target.value})} style={{flex: 1}} />
+                    <button onClick={fetchCustomerByMobile} type="button" className="btn-modal-secondary" style={{padding:'0 1rem', borderRadius:'6px', cursor:'pointer', fontWeight:'600'}}>Fetch</button>
+                  </div>
+                </div>
                 <div className="form-group"><label>Alternate Mobile</label><input type="text" className="form-control" placeholder="+91 XXXXX XXXXX" value={customer.altMobile} onChange={e => setCustomer({...customer, altMobile: e.target.value})} /></div>
                 <div className="form-group"><label>Email (Optional)</label><input type="email" className="form-control" placeholder="customer@email.com" value={customer.email} onChange={e => setCustomer({...customer, email: e.target.value})} /></div>
               </div>

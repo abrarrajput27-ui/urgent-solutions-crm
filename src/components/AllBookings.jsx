@@ -2,9 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import TopNav from './TopNav';
 import { supabase } from '../lib/supabaseClient';
-import { Search, Filter, Eye, Loader2, FileText, Download, Trash2, Edit3 } from 'lucide-react';
+import { Search, Filter, Eye, Loader2, FileText, Download, Trash2, Edit3, User, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import '../dashboard.css';
+
+const getVehicleImage = (category) => {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('sedan')) return 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=300&q=80';
+  if (cat.includes('suv')) return 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=300&q=80';
+  if (cat.includes('crysta') || cat.includes('ertiga') || cat.includes('innova')) return 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=300&q=80';
+  if (cat.includes('tempo') || cat.includes('traveller') || cat.includes('van')) return 'https://images.unsplash.com/photo-1566472856447-19e9842a2754?auto=format&fit=crop&w=300&q=80';
+  return 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=300&q=80'; // fallback
+};
 
 const AllBookings = () => {
   const navigate = useNavigate();
@@ -44,7 +53,7 @@ const AllBookings = () => {
     }
   };
 
-  const filteredBookings = bookings.filter(b => {
+  const sortedBookings = [...bookings].filter(b => {
     const matchesSearch = 
       (b.booking_id && b.booking_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (b.customer_name && b.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -54,15 +63,19 @@ const AllBookings = () => {
     const matchesStatus = statusFilter ? b.booking_status === statusFilter : true;
 
     return matchesSearch && matchesSource && matchesStatus;
+  }).sort((a, b) => {
+    const dateA = new Date(a.pickup_datetime || a.created_at).getTime();
+    const dateB = new Date(b.pickup_datetime || b.created_at).getTime();
+    return dateB - dateA;
   });
 
   const exportToCSV = () => {
-    if (filteredBookings.length === 0) return;
+    if (sortedBookings.length === 0) return;
     
     const headers = ['Booking ID', 'Date', 'Customer Name', 'Mobile', 'Source', 'Vehicle Type', 'My Amount', 'Expenses', 'Profit', 'Status'];
     const csvRows = [headers.join(',')];
     
-    filteredBookings.forEach(b => {
+    sortedBookings.forEach(b => {
       const row = [
         b.booking_id,
         b.booking_date,
@@ -198,204 +211,160 @@ const AllBookings = () => {
             </div>
           </div>
 
-          {/* Table Area */}
-          <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+          {/* Cards Area */}
+          <div style={{ borderRadius: '12px', overflow: 'hidden' }}>
             {loading ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748B' }}>
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748B', background: 'white', borderRadius: '12px' }}>
                 <Loader2 size={32} className="lucide-spin" style={{ margin: '0 auto 1rem', animation: 'spin 1s linear infinite' }} />
                 Loading bookings...
               </div>
             ) : error ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: '#DC2626', background: '#FEF2F2' }}>
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#DC2626', background: '#FEF2F2', borderRadius: '12px' }}>
                 Error fetching data: {error}
               </div>
-            ) : (
-              <>
-              <div className="all-bookings-table-wrapper all-bookings-desktop" style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-                  <thead style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                    <tr>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Booking ID</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Date</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Customer</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Mobile</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Route</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Source</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Vehicle Type</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>My Amt</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Expenses</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Profit</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Recovery</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Status</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600' }}>Created At</th>
-                      <th style={{ padding: '1rem', color: '#475569', fontWeight: '600', textAlign: 'center' }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredBookings.length === 0 ? (
-                      <tr>
-                        <td colSpan="14" style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8' }}>
-                          No bookings found matching your criteria.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredBookings.map((b) => (
-                        <tr key={b.id || b.booking_id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s', ':hover': { background: '#F8FAFC' } }}>
-                          <td data-label="Booking ID" style={{ padding: '1rem', fontWeight: '600', color: '#0B192C' }}>{b.booking_id}</td>
-                          <td data-label="Date" style={{ padding: '1rem', color: '#64748B' }}>{b.booking_date}</td>
-                          <td data-label="Customer" style={{ padding: '1rem', fontWeight: '500' }}>{b.customer_name || 'N/A'}</td>
-                          <td data-label="Mobile" style={{ padding: '1rem', color: '#64748B' }}>{b.customer_mobile || 'N/A'}</td>
-                          <td data-label="Route" style={{ padding: '1rem', color: '#64748B', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.route || 'N/A'}</td>
-                          <td data-label="Source" style={{ padding: '1rem' }}>
-                            <span style={{ background: '#E0E7FF', color: '#4338CA', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
-                              {b.source_category || b.booking_source}
-                            </span>
-                          </td>
-                          <td data-label="Vehicle Type" style={{ padding: '1rem', color: '#64748B' }}>{b.service_vehicle_type}</td>
-                          <td data-label="My Amt" style={{ padding: '1rem', fontWeight: '600' }}>₹{b.my_amount?.toLocaleString() || 0}</td>
-                          <td data-label="Expenses" style={{ padding: '1rem', color: '#DC2626' }}>₹{b.total_trip_expenses?.toLocaleString() || 0}</td>
-                          <td data-label="Profit" style={{ padding: '1rem', color: '#16A34A', fontWeight: '700' }}>₹{b.profit?.toLocaleString() || 0}</td>
-                          <td data-label="Recovery" style={{ padding: '1rem', color: '#EA580C' }}>{b.pending_recovery_amount > 0 ? `₹${b.pending_recovery_amount.toLocaleString()}` : '-'}</td>
-                          <td data-label="Status" style={{ padding: '1rem' }}>
-                            <span style={{ 
-                              background: b.booking_status === 'Confirmed' ? '#DCFCE7' : b.booking_status === 'Completed' ? '#DBEAFE' : b.booking_status === 'Cancelled' ? '#FEE2E2' : '#FEF3C7', 
-                              color: b.booking_status === 'Confirmed' ? '#166534' : b.booking_status === 'Completed' ? '#1E40AF' : b.booking_status === 'Cancelled' ? '#991B1B' : '#92400E', 
-                              padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' 
-                            }}>
-                              {b.booking_status || 'Pending'}
-                            </span>
-                          </td>
-                          <td data-label="Created At" style={{ padding: '1rem', color: '#94A3B8', fontSize: '0.75rem' }}>
-                            {new Date(b.created_at).toLocaleDateString()}
-                          </td>
-                          <td data-label="Action" style={{ padding: '1rem', textAlign: 'center' }}>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                              <button 
-                                onClick={() => navigate(`/booking-detail/${b.id}`)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
-                                title="View"
-                              >
-                                <Eye size={18} />
-                              </button>
-                              {activeTab === 'All' ? (
-                                <>
-                                  <button 
-                                    onClick={() => navigate(`/booking-master/${b.id}`)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
-                                    title="Edit"
-                                  >
-                                    <Edit3 size={18} />
-                                  </button>
-                                  <button 
-                                    onClick={() => handleDelete(b.id)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', transition: 'color 0.2s' }} 
-                                    title="Move to Trash"
-                                  >
-                                    <Trash2 size={18} />
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <button 
-                                    onClick={() => handleRestore(b.id)}
-                                    style={{ background: '#10B981', color: 'white', border: 'none', cursor: 'pointer', padding: '0.3rem 0.6rem', borderRadius: '4px' }} 
-                                    title="Restore"
-                                  >
-                                    Restore
-                                  </button>
-                                  <button 
-                                    onClick={() => handleDelete(b.id)}
-                                    style={{ background: '#EF4444', color: 'white', border: 'none', cursor: 'pointer', padding: '0.3rem 0.6rem', borderRadius: '4px' }} 
-                                    title="Delete Permanently"
-                                  >
-                                    Delete
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+            ) : sortedBookings.length === 0 ? (
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#94A3B8', background: 'white', borderRadius: '12px' }}>
+                No bookings found matching your criteria.
               </div>
+            ) : (
+              <div className="bookings-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem', width: '100%' }}>
+                {sortedBookings.map((b) => (
+                  <div key={b.id} style={{ background: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column' }}>
+                    
+                    {/* ROW 1: ID & Status */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #F1F5F9', background: '#F8FAFC' }}>
+                      <span style={{ fontSize: '0.95rem', fontWeight: '800', color: '#0B192C' }}>{b.booking_id}</span>
+                      <span style={{ 
+                        background: b.booking_status === 'Confirmed' ? '#EFF6FF' : b.booking_status === 'Completed' ? '#F0FDF4' : b.booking_status === 'Cancelled' ? '#FEF2F2' : '#FFF7ED', 
+                        color: b.booking_status === 'Confirmed' ? '#2563EB' : b.booking_status === 'Completed' ? '#16A34A' : b.booking_status === 'Cancelled' ? '#DC2626' : '#EA580C', 
+                        padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' 
+                      }}>
+                        {b.booking_status || 'Pending'}
+                      </span>
+                    </div>
 
-              {/* Mobile Card View */}
-              <div className="all-bookings-mobile">
-                {filteredBookings.length === 0 ? (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: '#64748B' }}>
-                    No bookings found matching your search.
-                  </div>
-                ) : (
-                  filteredBookings.map((b) => (
-                    <div key={b.id || b.booking_id} style={{ background: 'white', borderRadius: '12px', padding: '1rem', border: '1px solid #E2E8F0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #F1F5F9', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
-                        <div>
-                          <div style={{ fontWeight: '700', color: '#0B192C', fontSize: '1.1rem' }}>{b.booking_id}</div>
-                          <div style={{ color: '#64748B', fontSize: '0.8rem', marginTop: '0.2rem' }}>{b.booking_date}</div>
-                        </div>
-                        <span style={{ 
-                          background: b.booking_status === 'Confirmed' ? '#DCFCE7' : b.booking_status === 'Completed' ? '#DBEAFE' : b.booking_status === 'Cancelled' ? '#FEE2E2' : '#FEF3C7', 
-                          color: b.booking_status === 'Confirmed' ? '#166534' : b.booking_status === 'Completed' ? '#1E40AF' : b.booking_status === 'Cancelled' ? '#991B1B' : '#92400E', 
-                          padding: '0.25rem 0.6rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700' 
-                        }}>
-                          {b.booking_status || 'Pending'}
-                        </span>
-                      </div>
+                    <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                       
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                        <div>
-                          <div style={{ color: '#94A3B8', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: '600' }}>Customer</div>
-                          <div style={{ fontWeight: '600', color: '#334155' }}>{b.customer_name || 'N/A'}</div>
-                          <div style={{ color: '#64748B', fontSize: '0.8rem' }}>{b.customer_mobile}</div>
+                      {/* ROW 2: Route */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div style={{ flex: 1, fontSize: '1.25rem', fontWeight: '800', color: '#0F172A', lineHeight: '1.3' }}>{b.pickup_location || 'Not Set'}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#CBD5E1', flexShrink: 0 }}>
+                          <ArrowRight size={24} color="#94A3B8" />
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ color: '#94A3B8', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: '600' }}>Route</div>
-                          <div style={{ fontWeight: '600', color: '#334155', wordBreak: 'break-word' }}>{b.route || 'N/A'}</div>
+                        <div style={{ flex: 1, fontSize: '1.25rem', fontWeight: '800', color: '#0F172A', lineHeight: '1.3', textAlign: 'right' }}>{b.drop_location || 'Not Set'}</div>
+                      </div>
+
+                      {/* ROW 3: Date & Time */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: '#F8FAFC', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+                        <div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Pickup</div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#334155' }}>
+                            {b.pickup_datetime ? new Date(b.pickup_datetime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : (b.booking_date || 'N/A')}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Created</div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#334155' }}>
+                            {new Date(b.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                          </div>
                         </div>
                       </div>
 
-                      <div style={{ background: '#F8FAFC', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', textAlign: 'center' }}>
-                        <div>
-                          <div style={{ color: '#94A3B8', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: '700' }}>My Amt</div>
-                          <div style={{ fontWeight: '700', color: '#0F172A' }}>₹{b.my_amount?.toLocaleString() || 0}</div>
+                      {/* ROW 4: Vehicle Section */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #F1F5F9' }}>
+                        <div style={{ width: '80px', height: '60px', borderRadius: '8px', overflow: 'hidden', background: '#F1F5F9', flexShrink: 0, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
+                          <img src={getVehicleImage(b.service_vehicle_type)} alt={b.service_vehicle_type} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
-                        <div style={{ borderLeft: '1px solid #E2E8F0', borderRight: '1px solid #E2E8F0' }}>
-                          <div style={{ color: '#94A3B8', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: '700' }}>Expenses</div>
-                          <div style={{ fontWeight: '700', color: '#DC2626' }}>₹{b.total_trip_expenses?.toLocaleString() || 0}</div>
-                        </div>
-                        <div>
-                          <div style={{ color: '#94A3B8', fontSize: '0.7rem', textTransform: 'uppercase', fontWeight: '700' }}>Profit</div>
-                          <div style={{ fontWeight: '800', color: '#16A34A' }}>₹{b.profit?.toLocaleString() || 0}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#0F172A', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.service_vehicle_type || 'Unassigned'}</div>
+                          <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: '600' }}>{b.vehicle_number || 'No Vehicle No.'}</div>
+                          <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginTop: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><User size={12} style={{verticalAlign: 'middle', marginRight: '4px'}}/> {b.driver_name || 'No Driver'}</div>
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {/* ROW 5: Financial Summary */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <div style={{ background: '#F8FAFC', padding: '0.75rem', borderRadius: '10px' }}>
+                          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.2rem' }}>My Amount</div>
+                          <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0F172A' }}>₹{b.my_amount?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={{ background: '#F8FAFC', padding: '0.75rem', borderRadius: '10px' }}>
+                          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Expenses</div>
+                          <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#DC2626' }}>₹{b.total_trip_expenses?.toLocaleString() || 0}</div>
+                        </div>
+                        <div style={{ background: b.profit < 0 ? '#FEF2F2' : '#F0FDF4', padding: '0.75rem', borderRadius: '10px' }}>
+                          <div style={{ fontSize: '0.7rem', color: b.profit < 0 ? '#991B1B' : '#166534', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Profit</div>
+                          <div style={{ fontSize: '1.1rem', fontWeight: '800', color: b.profit < 0 ? '#DC2626' : '#16A34A' }}>₹{b.profit?.toLocaleString() || 0}</div>
+                        </div>
+                      </div>
+
+                      {/* ROW 6 & 7: Customer & Source */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Customer</div>
+                          <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#334155' }}>{b.customer_name || 'N/A'}</div>
+                          <div style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '0.1rem' }}>{b.customer_mobile || 'N/A'}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Source</div>
+                          <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#334155' }}>{b.source_category || b.booking_source || 'N/A'}</div>
+                          <div style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '0.1rem' }}>{b.booking_source || 'N/A'}</div>
+                        </div>
+                      </div>
+
+                      {/* ROW 9: Tags */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                        {b.trip_type && <span style={{ background: '#F1F5F9', color: '#475569', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700' }}>{b.trip_type}</span>}
+                        {b.service_vehicle_type && <span style={{ background: '#F1F5F9', color: '#475569', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700' }}>{b.service_vehicle_type}</span>}
+                        {b.collection_mode && <span style={{ background: '#F1F5F9', color: '#475569', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700' }}>{b.collection_mode}</span>}
+                      </div>
+
+                      {/* ROW 8: Actions */}
+                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
                         <button 
-                          onClick={() => navigate(`/bookings/${b.id}`)}
-                          style={{ flex: 1, background: '#0B192C', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                          onClick={() => navigate(`/booking-detail/${b.id}`)}
+                          style={{ flex: 1, background: '#EFF6FF', color: '#2563EB', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
                         >
                           <Eye size={16} /> View
                         </button>
-                        <button 
-                          onClick={() => navigate(`/bookings/${b.id}/edit`)}
-                          style={{ flex: 1, background: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
-                        >
-                          <Edit3 size={16} /> Edit
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(b.id)}
-                          style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FCA5A5', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        
+                        {activeTab === 'All' ? (
+                          <>
+                            <button 
+                              onClick={() => navigate(`/booking-master/${b.id}`)}
+                              style={{ flex: 1, background: '#FFFBEB', color: '#D97706', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
+                            >
+                              <Edit3 size={16} /> Edit
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(b.id)}
+                              style={{ flex: 1, background: '#FEF2F2', color: '#DC2626', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
+                            >
+                              <Trash2 size={16} /> Delete
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button 
+                              onClick={() => handleRestore(b.id)}
+                              style={{ flex: 1, background: '#F0FDF4', color: '#16A34A', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
+                            >
+                              Restore
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(b.id)}
+                              style={{ flex: 1, background: '#FEF2F2', color: '#DC2626', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
+                            >
+                              <Trash2 size={16} /> Delete
+                            </button>
+                          </>
+                        )}
                       </div>
+
                     </div>
-                  ))
-                )}
+                  </div>
+                ))}
               </div>
-              </>
             )}
           </div>
         </div>

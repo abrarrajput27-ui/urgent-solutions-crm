@@ -30,7 +30,7 @@ const Sidebar = () => {
     { name: 'All Bookings', path: '/all-bookings', icon: <BookOpen size={18} />, active: location.pathname === '/all-bookings' },
     { name: 'Customers', path: '/customers', icon: <Users size={18} />, active: location.pathname === '/customers' },
     { name: 'Vendors', icon: <Briefcase size={18} /> },
-    { name: 'Drivers', icon: <Car size={18} /> },
+    { name: 'Drivers', path: '/drivers', icon: <Car size={18} />, active: location.pathname === '/drivers' },
     { name: 'Recovery Ledger', icon: <Wallet size={18} /> },
     { name: 'Expense Ledger', icon: <Banknote size={18} /> },
     { name: 'Loan / Debt Ledger', icon: <CreditCard size={18} /> },

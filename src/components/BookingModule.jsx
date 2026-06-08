@@ -187,6 +187,30 @@ const BookingModule = () => {
     }
   };
 
+  const fetchDriverByMobile = async (e) => {
+    if (e) e.preventDefault();
+    if (!driver.mobile) return;
+    
+    try {
+      const { data, error } = await supabase.from('drivers').select('*').eq('mobile', driver.mobile).single();
+      if (data) {
+        setDriver({
+          ...driver,
+          name: data.name || '',
+          vehicleNo: data.vehicle_number || '',
+          model: data.vehicle_model || '',
+          category: data.vehicle_category || 'Sedan',
+          fuel: data.fuel_type || 'Petrol'
+        });
+        alert("Driver found and auto-filled.");
+      } else {
+        alert("No existing driver found with this mobile.");
+      }
+    } catch (err) {
+      alert("Error fetching driver or not found.");
+    }
+  };
+
   // --- CALCULATIONS ---
   const isOurVehicle = serviceVehicleType === 'Our Vehicle';
   
@@ -364,6 +388,44 @@ const BookingModule = () => {
           }
         } catch (custErr) {
           console.error("Failed to upsert customer", custErr);
+        }
+
+        // Upsert Driver logic
+        if (driver.name && driver.mobile) {
+          let driverEarnings = 0;
+          if (driverOwnership === 'Outside Driver') {
+            driverEarnings = fin.vendorOrDriverAmount || 0;
+          }
+          
+          try {
+            const { data: existingDriver } = await supabase.from('drivers').select('*').eq('mobile', driver.mobile).single();
+            if (existingDriver) {
+              await supabase.from('drivers').update({
+                name: driver.name,
+                vehicle_number: driver.vehicleNo,
+                vehicle_model: driver.model,
+                vehicle_category: driver.category,
+                fuel_type: driver.fuel,
+                total_trips: (existingDriver.total_trips || 0) + 1,
+                total_driver_amount: Number(existingDriver.total_driver_amount || 0) + Number(driverEarnings),
+                last_trip_date: new Date().toISOString()
+              }).eq('id', existingDriver.id);
+            } else {
+              await supabase.from('drivers').insert([{
+                name: driver.name,
+                mobile: driver.mobile,
+                vehicle_number: driver.vehicleNo,
+                vehicle_model: driver.model,
+                vehicle_category: driver.category,
+                fuel_type: driver.fuel,
+                total_trips: 1,
+                total_driver_amount: Number(driverEarnings),
+                last_trip_date: new Date().toISOString()
+              }]);
+            }
+          } catch (driverErr) {
+            console.error("Failed to upsert driver", driverErr);
+          }
         }
       }
       
@@ -579,7 +641,13 @@ const BookingModule = () => {
 
               <div className="form-grid form-grid-3">
                 <div className="form-group"><label>Driver Name</label><input type="text" className="form-control" value={driver.name} onChange={e => setDriver({...driver, name: e.target.value})} /></div>
-                <div className="form-group"><label>Driver Mobile</label><input type="text" className="form-control" value={driver.mobile} onChange={e => setDriver({...driver, mobile: e.target.value})} /></div>
+                <div className="form-group">
+                  <label>Driver Mobile</label>
+                  <div style={{display:'flex', gap:'0.5rem'}}>
+                    <input type="text" className="form-control" value={driver.mobile} onChange={e => setDriver({...driver, mobile: e.target.value})} style={{flex: 1}} />
+                    <button onClick={fetchDriverByMobile} type="button" className="btn-modal-secondary" style={{padding:'0 1rem', borderRadius:'6px', cursor:'pointer', fontWeight:'600'}}>Fetch</button>
+                  </div>
+                </div>
                 <div className="form-group"><label>Vehicle Number</label><input type="text" className="form-control" value={driver.vehicleNo} onChange={e => setDriver({...driver, vehicleNo: e.target.value})} /></div>
                 <div className="form-group"><label>Vehicle Model</label><input type="text" className="form-control" value={driver.model} onChange={e => setDriver({...driver, model: e.target.value})} /></div>
                 <div className="form-group"><label>Category</label><select className="form-control" value={driver.category} onChange={e => setDriver({...driver, category: e.target.value})}><option>Sedan</option><option>SUV</option><option>Hatchback</option></select></div>

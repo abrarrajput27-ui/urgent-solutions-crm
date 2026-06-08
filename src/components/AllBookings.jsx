@@ -255,7 +255,7 @@ const AllBookings = () => {
                       </div>
 
                       {/* ROW 3: Date & Time */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: '#F8FAFC', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+                      <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: '#F8FAFC', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
                         <div>
                           <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Pickup</div>
                           <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#334155' }}>
@@ -283,7 +283,7 @@ const AllBookings = () => {
                       </div>
 
                       {/* ROW 5: Financial Summary */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div className="responsive-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
                         <div style={{ background: '#F8FAFC', padding: '0.75rem', borderRadius: '10px' }}>
                           <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.2rem' }}>My Amount</div>
                           <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0F172A' }}>₹{b.my_amount?.toLocaleString() || 0}</div>
@@ -299,7 +299,7 @@ const AllBookings = () => {
                       </div>
 
                       {/* ROW 6 & 7: Customer & Source */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                      <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                         <div>
                           <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Customer</div>
                           <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#334155' }}>{b.customer_name || 'N/A'}</div>
@@ -320,7 +320,7 @@ const AllBookings = () => {
                       </div>
 
                       {/* ROW 8: Actions */}
-                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                      <div className="action-buttons-grid" style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
                         <button 
                           onClick={() => navigate(`/bookings/${b.id}`)}
                           style={{ flex: 1, background: '#EFF6FF', color: '#2563EB', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}

@@ -322,7 +322,7 @@ const AllBookings = () => {
                       {/* ROW 8: Actions */}
                       <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
                         <button 
-                          onClick={() => navigate(`/booking-detail/${b.id}`)}
+                          onClick={() => navigate(`/bookings/${b.id}`)}
                           style={{ flex: 1, background: '#EFF6FF', color: '#2563EB', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
                         >
                           <Eye size={16} /> View
@@ -331,7 +331,7 @@ const AllBookings = () => {
                         {activeTab === 'All' ? (
                           <>
                             <button 
-                              onClick={() => navigate(`/booking-master/${b.id}`)}
+                              onClick={() => navigate(`/bookings/${b.id}/edit`)}
                               style={{ flex: 1, background: '#FFFBEB', color: '#D97706', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
                             >
                               <Edit3 size={16} /> Edit

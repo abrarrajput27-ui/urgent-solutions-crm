@@ -4,7 +4,7 @@
   height: 100vh;
   width: 100vw;
   background-color: #F8FAFC;
-  overflow: hidden; /* STRICT NO SCROLLING */
+  overflow: hidden;
   font-family: var(--font-family);
 }
 
@@ -285,7 +285,7 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 0.5rem;
-  overflow: hidden; /* STRICT NO SCROLLING */
+  overflow-y: auto;
 }
 
 /* Base Card */
@@ -631,6 +631,12 @@
 @media (max-width: 768px) {
   .dashboard-layout, .main-content { height: auto !important; min-height: 100vh !important; min-height: 100dvh !important; overflow: visible !important; }
   .dashboard-content { height: auto !important; overflow: visible !important; }
+  /* NEW BOOKING MOBILE FIX */
+  .form-grid-2, .form-grid-3 { grid-template-columns: 1fr !important; }
+  .trip-expense-row { flex-direction: column !important; align-items: stretch !important; gap: 0.5rem !important; }
+  .trip-expense-row > div { width: 100% !important; }
+  .live-calc-panel { position: static !important; width: 100% !important; margin-top: 1rem; }
+  .booking-form-wrapper { flex-direction: column !important; }
 }
 
 @media print {

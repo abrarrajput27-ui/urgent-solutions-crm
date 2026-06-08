@@ -53,13 +53,14 @@ const BookingDetail = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this booking? This action cannot be undone.")) {
+    if (window.confirm("Are you sure you want to move this booking to Trash?")) {
       try {
-        const { error } = await supabase.from('bookings').delete().eq('id', id);
+        const { error } = await supabase.from('bookings').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
         if (error) throw error;
+        alert("Booking moved to Trash.");
         navigate('/all-bookings');
       } catch (err) {
-        alert("Failed to delete booking: " + err.message);
+        alert("Failed to move booking to trash: " + err.message);
       }
     }
   };

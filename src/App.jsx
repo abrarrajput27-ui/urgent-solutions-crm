@@ -11,6 +11,17 @@ import Drivers from './components/Drivers';
 import DriverDetail from './components/DriverDetail';
 import './index.css';
 
+const NotFound = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F8FAFC', textAlign: 'center' }}>
+    <h1 style={{ fontSize: '4rem', color: '#0B192C', margin: 0 }}>404</h1>
+    <h2 style={{ color: '#475569', marginBottom: '1.5rem' }}>Page Not Found</h2>
+    <p style={{ color: '#64748B', marginBottom: '2rem' }}>The page you are looking for doesn't exist or has been moved.</p>
+    <button onClick={() => window.location.href = '/dashboard'} style={{ background: '#0044FF', color: 'white', padding: '0.75rem 2rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '600' }}>
+      Go to Dashboard
+    </button>
+  </div>
+);
+
 function App() {
   return (
     <Router>
@@ -25,7 +36,7 @@ function App() {
         <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="/drivers" element={<Drivers />} />
         <Route path="/drivers/:id" element={<DriverDetail />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

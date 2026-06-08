@@ -17,9 +17,13 @@ const BookingModule = () => {
   const [bookingIdLabel, setBookingIdLabel] = useState(`UT-2026-${Date.now()}`);
 
   // 1 & 2. Source and Vehicle Type
-  const [bookingSource, setBookingSource] = useState('Direct');
+  const [sourceCategory, setSourceCategory] = useState('Direct');
+  const [sourceName, setSourceName] = useState('');
+  const [applicationName, setApplicationName] = useState('');
+  const [groupName, setGroupName] = useState('');
+  const [advance, setAdvance] = useState({ paytm: '', status: 'Pending', date: '', notes: '' });
+
   const [serviceVehicleType, setServiceVehicleType] = useState('Our Vehicle');
-  const [directCustomerType, setDirectCustomerType] = useState('New Customer');
   
   // 3. Driver/Vehicle Ownership
   const [driverOwnership, setDriverOwnership] = useState('Our Driver');
@@ -27,39 +31,39 @@ const BookingModule = () => {
 
   // Basic States
   const [basic, setBasic] = useState({ 
-    status: 'Pending', date: '2026-06-05', pickupDate: '2026-06-06T10:00', 
-    tripType: 'One-Way Outstation', pickup: '', drop: '', route: '', days: 1, notes: '',
-    stops: []
+    status: 'Pending', date: new Date().toISOString().split('T')[0], pickupDate: '', pickupTime: '', 
+    tripType: 'One-Way Outstation', rentalPackage: '', pickup: '', drop: '', route: '', days: '', notes: ''
   });
+  const [coveredLocations, setCoveredLocations] = useState([]);
   const [customer, setCustomer] = useState({ name: '', mobile: '', altMobile: '', email: '' });
-  const [vendor, setVendor] = useState({ name: '', mobile: '', panelOwner: 'Abrar', platformName: '' });
-  const [driver, setDriver] = useState({ name: '', mobile: '', vehicleNo: '', model: '', category: 'Sedan', fuel: 'Petrol' });
+  const [vendor, setVendor] = useState({ name: '', mobile: '', panelOwner: '', platformName: '' });
+  const [driver, setDriver] = useState({ name: '', mobile: '', vehicleNo: '', model: '', brand: '', category: 'Sedan', fuel: 'Petrol' });
   
   const [fin, setFin] = useState({ 
-    myAmount: 0, vendorOrDriverAmount: 0, 
-    commissionPercentage: 0, commissionAmount: 0, totalBookingAmount: 0,
-    vendorAcceptedAmount: 0, vendorFinalAmount: 0
+    myAmount: '', vendorOrDriverAmount: '', 
+    commissionPercentage: '', commissionAmount: '', totalBookingAmount: '',
+    vendorAcceptedAmount: '', vendorFinalAmount: ''
   });
 
   // 4. Cash Collection
   const [collection, setCollection] = useState({
     doneBy: 'Our Driver', mode: 'Mixed',
-    cash: 0, paytm: 0, upi: 0, bank: 0
+    cash: '', paytm: '', upi: '', bank: ''
   });
 
   // 5. Extra Collection
-  const [extra, setExtra] = useState({ received: 'No', receivedAmount: 0 });
+  const [extra, setExtra] = useState({ received: 'No', receivedAmount: '' });
 
+  const [cngEntries, setCngEntries] = useState([]);
+  const [tollEntries, setTollEntries] = useState([]);
   const [expenses, setExpenses] = useState([
-    { id: 1, type: 'CNG', amount: 0 },
-    { id: 2, type: 'Petrol Filled', amount: 0 },
-    { id: 3, type: 'Petrol Running KM', amount: 0 },
-    { id: 4, type: 'Toll', amount: 0 },
-    { id: 5, type: 'State Tax', amount: 0 },
-    { id: 6, type: 'Parking', amount: 0 },
-    { id: 7, type: 'Food', amount: 0 },
-    { id: 8, type: 'Driver Advance', amount: 0 },
-    { id: 9, type: 'Other', amount: 0 }
+    { id: 2, type: 'Petrol Filled', amount: '' },
+    { id: 3, type: 'Petrol Running KM', amount: '' },
+    { id: 5, type: 'State Tax', amount: '' },
+    { id: 6, type: 'Parking', amount: '' },
+    { id: 7, type: 'Food', amount: '' },
+    { id: 8, type: 'Driver Advance', amount: '' },
+    { id: 9, type: 'Other', amount: '' }
   ]);
   const [showManualExpense, setShowManualExpense] = useState(false);
 
@@ -75,7 +79,17 @@ const BookingModule = () => {
       if (error) throw error;
       if (data) {
         setBookingIdLabel(data.booking_id);
-        setBookingSource(data.booking_source || 'Direct');
+        setSourceCategory(data.source_category || 'Direct');
+        setSourceName(data.source_name || '');
+        setApplicationName(data.application_name || '');
+        setGroupName(data.group_name || '');
+        setAdvance({
+          paytm: data.advance_paytm_amount || '',
+          status: data.advance_payment_status || 'Pending',
+          date: data.advance_payment_date || '',
+          notes: data.advance_notes || ''
+        });
+
         setServiceVehicleType(data.service_vehicle_type || 'Our Vehicle');
         setDriverOwnership(data.driver_ownership || 'Our Driver');
         setVehicleOwnership(data.vehicle_ownership || 'Our Vehicle');
@@ -83,15 +97,18 @@ const BookingModule = () => {
         setBasic({
           status: data.booking_status || 'Pending',
           date: data.booking_date || '',
-          pickupDate: data.pickup_datetime || '',
+          pickupDate: data.pickup_date || (data.pickup_datetime ? data.pickup_datetime.split('T')[0] : ''),
+          pickupTime: data.pickup_time || (data.pickup_datetime && data.pickup_datetime.includes('T') ? data.pickup_datetime.split('T')[1].substring(0, 5) : ''),
           tripType: data.trip_type || 'One-Way Outstation',
+          rentalPackage: data.rental_package || '',
           pickup: data.pickup_location || '',
           drop: data.drop_location || '',
           route: data.route || '',
-          days: data.number_of_days || 1,
-          notes: data.notes || '',
-          stops: []
+          days: data.number_of_days || '',
+          notes: data.notes || ''
         });
+        
+        setCoveredLocations(Array.isArray(data.covered_locations) ? data.covered_locations : []);
 
         setCustomer({
           name: data.customer_name || '',
@@ -103,7 +120,7 @@ const BookingModule = () => {
         setVendor({
           name: data.vendor_name || '',
           mobile: data.vendor_mobile || '',
-          panelOwner: data.panel_owner || 'Abrar',
+          panelOwner: data.panel_owner || '',
           platformName: data.platform_name || ''
         });
 
@@ -112,49 +129,66 @@ const BookingModule = () => {
           mobile: data.driver_mobile || '',
           vehicleNo: data.vehicle_number || '',
           model: data.vehicle_model || '',
+          brand: data.vehicle_brand || '',
           category: data.vehicle_category || 'Sedan',
           fuel: data.fuel_type || 'Petrol'
         });
 
         setFin({
-          myAmount: data.my_amount || 0,
-          vendorOrDriverAmount: data.vendor_amount || data.driver_amount || 0,
-          commissionPercentage: data.commission_percentage || 0,
-          commissionAmount: data.commission_amount || 0,
-          totalBookingAmount: data.total_booking_amount || 0,
-          vendorAcceptedAmount: 0,
-          vendorFinalAmount: 0
+          myAmount: data.my_amount || '',
+          vendorOrDriverAmount: data.vendor_amount || data.driver_amount || '',
+          commissionPercentage: data.commission_percentage || '',
+          commissionAmount: data.commission_amount || '',
+          totalBookingAmount: data.total_booking_amount || '',
+          vendorAcceptedAmount: '',
+          vendorFinalAmount: ''
         });
 
         setCollection({
           doneBy: data.collection_done_by || 'Our Driver',
           mode: data.collection_mode || 'Mixed',
-          cash: data.cash_collection_amount || 0,
-          paytm: data.paytm_collection_amount || 0,
-          upi: data.upi_collection_amount || 0,
-          bank: data.bank_collection_amount || 0
+          cash: data.cash_collection_amount || '',
+          paytm: data.paytm_collection_amount || '',
+          upi: data.upi_collection_amount || '',
+          bank: data.bank_collection_amount || ''
         });
+        
+        setCngEntries(Array.isArray(data.cng_entries) ? data.cng_entries : []);
+        setTollEntries(Array.isArray(data.toll_entries) ? data.toll_entries : []);
         
         // Expenses logic
         const newExpenses = [
-          { id: 1, type: 'CNG', amount: data.expense_cng || 0 },
-          { id: 2, type: 'Petrol Filled', amount: data.expense_petrol_filled || 0 },
-          { id: 3, type: 'Petrol Running KM', amount: data.expense_petrol_running_km || 0 },
-          { id: 4, type: 'Toll', amount: data.expense_toll || 0 },
-          { id: 5, type: 'State Tax', amount: data.expense_state_tax || 0 },
-          { id: 6, type: 'Parking', amount: data.expense_parking || 0 },
-          { id: 7, type: 'Food', amount: data.expense_food || 0 },
-          { id: 8, type: 'Driver Advance', amount: data.expense_driver_advance || 0 },
-          { id: 9, type: 'Other', amount: data.expense_other || 0 }
+          { id: 2, type: 'Petrol Filled', amount: data.expense_petrol_filled || '' },
+          { id: 3, type: 'Petrol Running KM', amount: data.expense_petrol_running_km || '' },
+          { id: 5, type: 'State Tax', amount: data.expense_state_tax || '' },
+          { id: 6, type: 'Parking', amount: data.expense_parking || '' },
+          { id: 7, type: 'Food', amount: data.expense_food || '' },
+          { id: 8, type: 'Driver Advance', amount: data.expense_driver_advance || '' },
+          { id: 9, type: 'Other', amount: data.expense_other || '' }
         ];
         setExpenses(newExpenses);
+
+        setReview({
+          method: data.review_method || 'Link Review',
+          videoStatus: data.video_review_status || 'Pending',
+          videoDate: data.video_review_date || '',
+          linkSent: data.review_link_sent ? 'Yes' : 'No',
+          linkSentDate: data.review_link_sent_date || '',
+          received: data.review_received ? 'Yes' : 'No',
+          rating: data.rating || '',
+          url: data.review_url || '',
+          followUp: data.follow_up_required ? 'Yes' : 'No'
+        });
       }
     } catch (err) {
       setSaveError("Failed to load booking details.");
     }
   };
 
-  const [review, setReview] = useState({ status: 'Pending', reminderDate: '', type: 'Payment', notes: '' });
+  const [review, setReview] = useState({ 
+    method: 'Link Review', videoStatus: 'Pending', videoDate: '',
+    linkSent: 'No', linkSentDate: '', received: 'No', rating: '', url: '', followUp: 'No'
+  });
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -215,25 +249,28 @@ const BookingModule = () => {
   const isOurVehicle = serviceVehicleType === 'Our Vehicle';
   
   const activeExpenses = (isOurVehicle || showManualExpense) ? expenses : [];
-  const totalTripExpenses = activeExpenses.reduce((acc, ex) => acc + ex.amount, 0);
+  const cngTotal = cngEntries.reduce((acc, cng) => acc + (parseFloat(cng.amount) || 0), 0);
+  const tollTotal = tollEntries.reduce((acc, t) => acc + (parseFloat(t.amount) || 0), 0);
+  const otherTotal = activeExpenses.reduce((acc, ex) => acc + (parseFloat(ex.amount) || 0), 0);
+  const totalTripExpenses = cngTotal + tollTotal + otherTotal;
   
-  const totalDriverCollection = collection.cash + collection.paytm + collection.upi + collection.bank;
+  const totalDriverCollection = (parseFloat(collection.cash) || 0) + (parseFloat(collection.paytm) || 0) + (parseFloat(collection.upi) || 0) + (parseFloat(collection.bank) || 0);
 
   // Primary Profit Logic
   let profit = 0;
   let formulaUsed = '';
-  let acceptedBookingAmount = fin.myAmount; // usually my_amount
+  let acceptedBookingAmount = parseFloat(fin.myAmount) || 0;
 
-  // For MYF, "My Amount" acts as "My Booking Amount"
-  if (bookingSource === 'MYF') {
-    acceptedBookingAmount = fin.totalBookingAmount - fin.commissionAmount;
+  // For Application/MakeMyTrip, "My Amount" acts as "My Booking Amount"
+  if (sourceCategory === 'Application' && applicationName === 'MakeMyTrip') {
+    acceptedBookingAmount = (parseFloat(fin.totalBookingAmount) || 0) - (parseFloat(fin.commissionAmount) || 0);
   }
   
   if (isOurVehicle) {
     profit = acceptedBookingAmount - totalTripExpenses;
     formulaUsed = 'my_amount - total_trip_expenses';
   } else {
-    profit = acceptedBookingAmount - fin.vendorOrDriverAmount;
+    profit = acceptedBookingAmount - (parseFloat(fin.vendorOrDriverAmount) || 0);
     formulaUsed = 'my_amount - vendor_or_driver_amount';
   }
 
@@ -242,12 +279,14 @@ const BookingModule = () => {
   let pendingExtraCollection = 0;
   let payableToDriverOrVendor = 0;
 
+  const vendorAmount = parseFloat(fin.vendorOrDriverAmount) || 0;
+
   if (!isOurVehicle) {
-    if (totalDriverCollection > fin.vendorOrDriverAmount) {
-      extraCollectionAmount = totalDriverCollection - fin.vendorOrDriverAmount;
-      pendingExtraCollection = extra.received === 'No' ? extraCollectionAmount : Math.max(0, extraCollectionAmount - extra.receivedAmount);
-    } else if (totalDriverCollection < fin.vendorOrDriverAmount) {
-      payableToDriverOrVendor = fin.vendorOrDriverAmount - totalDriverCollection;
+    if (totalDriverCollection > vendorAmount) {
+      extraCollectionAmount = totalDriverCollection - vendorAmount;
+      pendingExtraCollection = extra.received === 'No' ? extraCollectionAmount : Math.max(0, extraCollectionAmount - (parseFloat(extra.receivedAmount) || 0));
+    } else if (totalDriverCollection < vendorAmount) {
+      payableToDriverOrVendor = vendorAmount - totalDriverCollection;
     }
   }
 
@@ -259,8 +298,8 @@ const BookingModule = () => {
 
   // --- ROUTE AUTOGENERATION ---
   let generatedRoute = basic.pickup || 'Pickup';
-  if (basic.stops && basic.stops.length > 0) {
-    const validStops = basic.stops.filter(s => s.trim() !== '');
+  if (basic.tripType === 'Round-Trip Outstation' && coveredLocations.length > 0) {
+    const validStops = coveredLocations.map(c => c.location).filter(s => s.trim() !== '');
     if (validStops.length > 0) {
       generatedRoute += ' -> ' + validStops.join(' -> ');
     }
@@ -276,7 +315,7 @@ const BookingModule = () => {
     setIsSaving(true);
     setSaveError(null);
 
-    if (!customer.name || !customer.mobile || !basic.pickup || !basic.drop || !bookingSource || !serviceVehicleType || !fin.myAmount) {
+    if (!customer.name || !customer.mobile || !basic.pickup || !basic.drop || !sourceCategory || !serviceVehicleType || (!fin.myAmount && fin.myAmount !== 0)) {
       setSaveError("Validation Error: Please fill all required fields (Customer Name, Mobile, Pickup, Drop, Source, Service Type, My Amount).");
       setIsSaving(false);
       return;
@@ -284,17 +323,30 @@ const BookingModule = () => {
 
     const bookingData = {
       booking_id: bookingIdLabel,
-      booking_source: bookingSource,
+      
+      source_category: sourceCategory,
+      source_name: sourceName,
+      application_name: applicationName,
+      group_name: groupName,
+      advance_paytm_amount: parseFloat(advance.paytm) || 0,
+      advance_payment_status: advance.status,
+      advance_payment_date: advance.date || null,
+      advance_notes: advance.notes,
+
       service_vehicle_type: serviceVehicleType,
       driver_ownership: driverOwnership,
       vehicle_ownership: vehicleOwnership,
       booking_status: basic.status,
       booking_date: basic.date,
-      pickup_datetime: basic.pickupDate,
+      pickup_datetime: `${basic.pickupDate}T${basic.pickupTime || '00:00'}`,
+      pickup_date: basic.pickupDate || null,
+      pickup_time: basic.pickupTime || null,
       trip_type: basic.tripType,
-      number_of_days: basic.days,
+      rental_package: basic.rentalPackage,
+      number_of_days: parseInt(basic.days) || 1,
       pickup_location: basic.pickup,
       drop_location: basic.drop,
+      covered_locations: coveredLocations,
       route: generatedRoute,
       notes: basic.notes,
       
@@ -312,29 +364,32 @@ const BookingModule = () => {
       driver_mobile: driver.mobile,
       vehicle_number: driver.vehicleNo,
       vehicle_model: driver.model,
+      vehicle_brand: driver.brand,
       vehicle_category: driver.category,
       fuel_type: driver.fuel,
       
-      my_amount: fin.myAmount,
-      vendor_amount: fin.vendorOrDriverAmount,
-      driver_amount: driverOwnership === 'Outside Driver' ? fin.vendorOrDriverAmount : 0,
-      total_booking_amount: fin.totalBookingAmount,
-      commission_percentage: fin.commissionPercentage,
-      commission_amount: fin.commissionAmount,
+      my_amount: parseFloat(fin.myAmount) || 0,
+      vendor_amount: parseFloat(fin.vendorOrDriverAmount) || 0,
+      driver_amount: driverOwnership === 'Outside Driver' ? (parseFloat(fin.vendorOrDriverAmount) || 0) : 0,
+      total_booking_amount: parseFloat(fin.totalBookingAmount) || 0,
+      commission_percentage: parseFloat(fin.commissionPercentage) || 0,
+      commission_amount: parseFloat(fin.commissionAmount) || 0,
       
       collection_done_by: collection.doneBy,
       collection_mode: collection.mode,
-      cash_collection_amount: collection.cash,
-      paytm_collection_amount: collection.paytm,
-      upi_collection_amount: collection.upi,
-      bank_collection_amount: collection.bank,
+      cash_collection_amount: parseFloat(collection.cash) || 0,
+      paytm_collection_amount: parseFloat(collection.paytm) || 0,
+      upi_collection_amount: parseFloat(collection.upi) || 0,
+      bank_collection_amount: parseFloat(collection.bank) || 0,
       collection_total: totalDriverCollection,
       
       total_trip_expenses: totalTripExpenses,
-      expense_cng: expenses.find(e => e.type === 'CNG')?.amount || 0,
+      cng_entries: cngEntries,
+      toll_entries: tollEntries,
+      expense_cng: cngTotal,
       expense_petrol_filled: expenses.find(e => e.type === 'Petrol Filled')?.amount || 0,
       expense_petrol_running_km: expenses.find(e => e.type === 'Petrol Running KM')?.amount || 0,
-      expense_toll: expenses.find(e => e.type === 'Toll')?.amount || 0,
+      expense_toll: tollTotal,
       expense_state_tax: expenses.find(e => e.type === 'State Tax')?.amount || 0,
       expense_parking: expenses.find(e => e.type === 'Parking')?.amount || 0,
       expense_food: expenses.find(e => e.type === 'Food')?.amount || 0,
@@ -348,7 +403,15 @@ const BookingModule = () => {
       extra_collection_amount: extraCollectionAmount,
       pending_extra_collection: pendingExtraCollection,
       
-      review_status: review.status
+      review_method: review.method,
+      video_review_status: review.videoStatus,
+      video_review_date: review.videoDate || null,
+      review_link_sent: review.linkSent === 'Yes',
+      review_link_sent_date: review.linkSentDate || null,
+      review_received: review.received === 'Yes',
+      rating: parseFloat(review.rating) || 0,
+      review_url: review.url,
+      follow_up_required: review.followUp === 'Yes'
     };
 
     try {

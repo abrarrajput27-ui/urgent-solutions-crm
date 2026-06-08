@@ -203,7 +203,7 @@ const BookingDetail = () => {
               </div>
               <div style={{ display: 'flex', gap: '1.5rem', color: '#94A3B8', fontSize: '0.95rem', fontWeight: '500' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Calendar size={16} /> {new Date(booking?.booking_date).toLocaleDateString()}</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Briefcase size={16} /> {booking?.booking_source}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Briefcase size={16} /> {booking?.source_category || booking?.booking_source}</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: booking?.service_vehicle_type === 'Our Vehicle' ? '#4ADE80' : '#F87171' }}><Car size={16} /> {booking?.service_vehicle_type}</span>
               </div>
             </div>
@@ -372,7 +372,7 @@ const BookingDetail = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#166534', background: '#F0FDF4', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Booking Ledger</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#166534', background: '#F0FDF4', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Customer Sheet</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#166534', background: '#F0FDF4', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Driver Sheet</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: booking?.booking_source !== 'Direct' ? '#166534' : '#94A3B8', background: booking?.booking_source !== 'Direct' ? '#F0FDF4' : '#F8FAFC', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Vendor Sheet</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: booking?.source_category !== 'Direct' ? '#166534' : '#94A3B8', background: booking?.source_category !== 'Direct' ? '#F0FDF4' : '#F8FAFC', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Vendor Sheet</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: booking?.total_trip_expenses > 0 ? '#166534' : '#94A3B8', background: booking?.total_trip_expenses > 0 ? '#F0FDF4' : '#F8FAFC', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Expense Ledger</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#166534', background: '#F0FDF4', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Profit Tracker</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: ((booking?.pending_recovery_amount || 0) + (booking?.pending_extra_collection || 0)) > 0 ? '#DC2626' : '#94A3B8', background: ((booking?.pending_recovery_amount || 0) + (booking?.pending_extra_collection || 0)) > 0 ? '#FEF2F2' : '#F8FAFC', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><AlertCircle size={14} /> Recovery Ledger</div>
@@ -389,16 +389,19 @@ const BookingDetail = () => {
                     {booking?.notes || 'No special instructions recorded for this booking.'}
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: '#F1F5F9', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: '#F1F5F9', borderRadius: '8px', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Review Status</span>
-                    <span style={{ fontWeight: '700', color: '#0F172A', marginTop: '0.2rem' }}>{booking?.review_status || 'Pending'}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Review Method</span>
+                    <span style={{ fontWeight: '700', color: '#0F172A', marginTop: '0.2rem' }}>{booking?.review_method || 'N/A'}</span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'right' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Next Reminder</span>
-                    <span style={{ fontWeight: '700', color: '#0F172A', marginTop: '0.2rem' }}>{booking?.next_reminder_date ? new Date(booking?.next_reminder_date).toLocaleDateString() : 'Not Set'}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Rating</span>
+                    <span style={{ fontWeight: '700', color: '#0F172A', marginTop: '0.2rem' }}>{booking?.rating ? `${booking.rating}/5` : 'Not Rated'}</span>
                   </div>
                 </div>
+                <DataRow label="Review Received" value={booking?.review_received ? 'Yes' : 'No'} />
+                <DataRow label="Follow Up Required" value={booking?.follow_up_required ? 'Yes' : 'No'} valueColor={booking?.follow_up_required ? '#DC2626' : undefined} />
+                {booking?.review_url && <DataRow label="Review Link" value={<a href={booking.review_url} target="_blank" rel="noreferrer" style={{color:'#3B82F6'}}>View Review</a>} />}
               </Card>
 
             </div>

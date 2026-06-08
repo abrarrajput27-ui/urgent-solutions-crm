@@ -12,6 +12,8 @@ const AllBookings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [activeTab, setActiveTab] = useState('All'); // 'All' | 'Trash'
+
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
@@ -19,16 +21,20 @@ const AllBookings = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [activeTab]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let query = supabase.from('bookings').select('*').order('created_at', { ascending: false });
+      
+      if (activeTab === 'Trash') {
+        query = query.eq('is_deleted', true);
+      } else {
+        query = query.or('is_deleted.is.null,is_deleted.eq.false');
+      }
 
+      const { data, error } = await query;
       if (error) throw error;
       setBookings(data || []);
     } catch (err) {
@@ -44,7 +50,7 @@ const AllBookings = () => {
       (b.customer_name && b.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (b.customer_mobile && b.customer_mobile.includes(searchTerm));
     
-    const matchesSource = sourceFilter ? b.booking_source === sourceFilter : true;
+    const matchesSource = sourceFilter ? (b.source_category === sourceFilter || b.booking_source === sourceFilter) : true;
     const matchesStatus = statusFilter ? b.booking_status === statusFilter : true;
 
     return matchesSearch && matchesSource && matchesStatus;
@@ -62,7 +68,7 @@ const AllBookings = () => {
         b.booking_date,
         `"${b.customer_name || ''}"`,
         b.customer_mobile,
-        b.booking_source,
+        b.source_category || b.booking_source,
         b.service_vehicle_type,
         b.my_amount || 0,
         b.total_trip_expenses || 0,
@@ -72,7 +78,7 @@ const AllBookings = () => {
       csvRows.push(row.join(','));
     });
     
-    const csvString = csvRows.join('\\n');
+    const csvString = csvRows.join('\n');
     const blob = new Blob([csvString], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -82,14 +88,38 @@ const AllBookings = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this booking? This action cannot be undone.")) {
-      try {
-        const { error } = await supabase.from('bookings').delete().eq('id', id);
-        if (error) throw error;
-        setBookings(bookings.filter(b => b.id !== id));
-      } catch (err) {
-        alert("Failed to delete booking: " + err.message);
+    if (activeTab === 'Trash') {
+      if (window.confirm("Are you sure you want to PERMANENTLY delete this booking? This action cannot be undone.")) {
+        try {
+          const { error } = await supabase.from('bookings').delete().eq('id', id);
+          if (error) throw error;
+          setBookings(bookings.filter(b => b.id !== id));
+        } catch (err) {
+          alert("Failed to delete booking: " + err.message);
+        }
       }
+    } else {
+      if (window.confirm("Move this booking to Trash?")) {
+        try {
+          const { error } = await supabase.from('bookings').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
+          if (error) throw error;
+          setBookings(bookings.filter(b => b.id !== id));
+          alert("Booking moved to Trash.");
+        } catch (err) {
+          alert("Failed to trash booking: " + err.message);
+        }
+      }
+    }
+  };
+
+  const handleRestore = async (id) => {
+    try {
+      const { error } = await supabase.from('bookings').update({ is_deleted: false, deleted_at: null }).eq('id', id);
+      if (error) throw error;
+      setBookings(bookings.filter(b => b.id !== id));
+      alert("Booking restored.");
+    } catch (err) {
+      alert("Failed to restore booking: " + err.message);
     }
   };
 
@@ -104,6 +134,22 @@ const AllBookings = () => {
             <h2 style={{ fontSize: '1.5rem', color: 'var(--primary-navy)', margin: 0 }}>All Bookings</h2>
             <button onClick={exportToCSV} className="btn-modal-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>
               <Download size={16} /> Export to CSV
+            </button>
+          </div>
+
+          {/* Tabs UI */}
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+            <button 
+              onClick={() => setActiveTab('All')}
+              style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', border: 'none', background: activeTab === 'All' ? 'var(--primary-navy)' : '#E2E8F0', color: activeTab === 'All' ? 'white' : '#475569', fontWeight: '600', cursor: 'pointer' }}
+            >
+              All Bookings
+            </button>
+            <button 
+              onClick={() => setActiveTab('Trash')}
+              style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', border: 'none', background: activeTab === 'Trash' ? '#EF4444' : '#E2E8F0', color: activeTab === 'Trash' ? 'white' : '#475569', fontWeight: '600', cursor: 'pointer' }}
+            >
+              Trash
             </button>
           </div>
 
@@ -202,7 +248,7 @@ const AllBookings = () => {
                           <td data-label="Route" style={{ padding: '1rem', color: '#64748B', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.route || 'N/A'}</td>
                           <td data-label="Source" style={{ padding: '1rem' }}>
                             <span style={{ background: '#E0E7FF', color: '#4338CA', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
-                              {b.booking_source}
+                              {b.source_category || b.booking_source}
                             </span>
                           </td>
                           <td data-label="Vehicle Type" style={{ padding: '1rem', color: '#64748B' }}>{b.service_vehicle_type}</td>
@@ -225,26 +271,47 @@ const AllBookings = () => {
                           <td data-label="Action" style={{ padding: '1rem', textAlign: 'center' }}>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
                               <button 
-                                onClick={() => navigate(`/bookings/${b.id}`)}
+                                onClick={() => navigate(`/booking-detail/${b.id}`)}
                                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
                                 title="View"
                               >
                                 <Eye size={18} />
                               </button>
-                              <button 
-                                onClick={() => navigate(`/bookings/${b.id}/edit`)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
-                                title="Edit"
-                              >
-                                <Edit3 size={18} />
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(b.id)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', transition: 'color 0.2s' }} 
-                                title="Delete"
-                              >
-                                <Trash2 size={18} />
-                              </button>
+                              {activeTab === 'All' ? (
+                                <>
+                                  <button 
+                                    onClick={() => navigate(`/booking-master/${b.id}`)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', transition: 'color 0.2s' }} 
+                                    title="Edit"
+                                  >
+                                    <Edit3 size={18} />
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDelete(b.id)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', transition: 'color 0.2s' }} 
+                                    title="Move to Trash"
+                                  >
+                                    <Trash2 size={18} />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button 
+                                    onClick={() => handleRestore(b.id)}
+                                    style={{ background: '#10B981', color: 'white', border: 'none', cursor: 'pointer', padding: '0.3rem 0.6rem', borderRadius: '4px' }} 
+                                    title="Restore"
+                                  >
+                                    Restore
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDelete(b.id)}
+                                    style={{ background: '#EF4444', color: 'white', border: 'none', cursor: 'pointer', padding: '0.3rem 0.6rem', borderRadius: '4px' }} 
+                                    title="Delete Permanently"
+                                  >
+                                    Delete
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>

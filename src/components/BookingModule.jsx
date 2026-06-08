@@ -339,7 +339,7 @@ const BookingModule = () => {
       vehicle_ownership: vehicleOwnership,
       booking_status: basic.status,
       booking_date: basic.date,
-      pickup_datetime: `${basic.pickupDate}T${basic.pickupTime || '00:00'}`,
+      pickup_datetime: basic.pickupDate && basic.pickupDate.includes('T') ? `${basic.pickupDate}:00` : basic.pickupDate ? `${basic.pickupDate}T${basic.pickupTime || '00:00'}:00` : null,
       pickup_date: basic.pickupDate || null,
       pickup_time: basic.pickupTime || null,
       trip_type: basic.tripType,
@@ -578,6 +578,21 @@ const BookingModule = () => {
                     <div className="form-group"><label>Source Vendor Mobile</label><input type="text" className="form-control" /></div>
                   </>
                 )}
+                {sourceCategory === 'Group' && (
+                  <>
+                    <div className="form-group"><label>Group Name</label><input type="text" className="form-control" value={groupName} onChange={e => setGroupName(e.target.value)} /></div>
+                    <div className="form-group"><label>Advance Paid via Paytm</label><input type="number" className="form-control" value={advance.paytm} onChange={e => setAdvance({...advance, paytm: e.target.value})} /></div>
+                    <div className="form-group">
+                      <label>Advance Payment Status</label>
+                      <select className="form-control" value={advance.status} onChange={e => setAdvance({...advance, status: e.target.value})}>
+                        <option>Pending</option><option>Received</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+                {sourceCategory === 'Taxi Sanchalak' && (
+                  <div className="form-group"><label>Application Name</label><input type="text" className="form-control" value={applicationName} onChange={e => setApplicationName(e.target.value)} /></div>
+                )}
                 {sourceCategory === 'Savaari' && (
                   <>
                     <div className="form-group">
@@ -609,7 +624,8 @@ const BookingModule = () => {
                   </select>
                 </div>
                 <div className="form-group"><label>Booking Date</label><input type="date" className="form-control" value={basic.date} onChange={e => setBasic({...basic, date: e.target.value})} /></div>
-                <div className="form-group"><label>Pickup Date & Time</label><input type="datetime-local" className="form-control" value={basic.pickupDate} onChange={e => setBasic({...basic, pickupDate: e.target.value})} /></div>
+                <div className="form-group"><label>Pickup Date</label><input type="date" className="form-control" value={basic.pickupDate} onChange={e => setBasic({...basic, pickupDate: e.target.value})} /></div>
+                <div className="form-group"><label>Pickup Time</label><input type="time" className="form-control" value={basic.pickupTime} onChange={e => setBasic({...basic, pickupTime: e.target.value})} /></div>
                 <div className="form-group">
                   <label>Trip Type</label>
                   <select className="form-control" value={basic.tripType} onChange={e => setBasic({...basic, tripType: e.target.value})}>

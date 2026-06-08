@@ -754,3 +754,48 @@
     overflow-x: hidden !important;
   }
 }
+
+/* NEW BOOKING MOBILE OVERFLOW FIX */
+@media (max-width: 768px) {
+  .booking-form-col .form-grid,
+  .booking-form-col .form-grid-2,
+  .booking-form-col .form-grid-3,
+  .booking-form-col .form-grid-4,
+  .booking-form-col .form-section > div[style*="display: grid"],
+  .booking-form-col .collection-grid,
+  .booking-form-col .recovery-grid {
+    grid-template-columns: 1fr !important;
+    display: grid !important;
+    width: 100% !important;
+  }
+
+  .booking-form-col input,
+  .booking-form-col select,
+  .booking-form-col textarea,
+  .booking-form-col .input-wrapper,
+  .booking-form-col .form-group {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .booking-form-col .expense-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+  
+  .booking-form-col .btn-remove-expense {
+    width: 100% !important;
+    justify-content: center !important;
+    margin-top: 0.2rem !important;
+  }
+
+  .booking-form-col .btn-add-expense {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}

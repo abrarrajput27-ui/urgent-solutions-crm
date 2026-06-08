@@ -18,6 +18,7 @@ const BookingModule = () => {
 
   // 1 & 2. Source and Vehicle Type
   const [sourceCategory, setSourceCategory] = useState('Direct');
+  const [directCustomerType, setDirectCustomerType] = useState('New Customer');
   const [sourceName, setSourceName] = useState('');
   const [applicationName, setApplicationName] = useState('');
   const [groupName, setGroupName] = useState('');
@@ -518,7 +519,7 @@ const BookingModule = () => {
               <div className="form-grid form-grid-2" style={{marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed #E2E8F0'}}>
                 <div className="form-group">
                   <label>Booking Source</label>
-                  <select className="form-control" style={{fontWeight:'700', color:'#0044FF'}} value={bookingSource} onChange={e => setBookingSource(e.target.value)}>
+                  <select className="form-control" style={{fontWeight:'700', color:'#0044FF'}} value={sourceCategory} onChange={e => setSourceCategory(e.target.value)}>
                     <option value="Direct">Direct</option>
                     <option value="Savaari">Savaari</option>
                     <option value="Group">Group</option>
@@ -539,7 +540,7 @@ const BookingModule = () => {
 
               {/* Dynamic Source Fields */}
               <div className="form-grid form-grid-3">
-                {bookingSource === 'Direct' && (
+                {sourceCategory === 'Direct' && (
                   <div className="form-group">
                     <label>Customer Type</label>
                     <select className="form-control" value={directCustomerType} onChange={e => setDirectCustomerType(e.target.value)}>
@@ -549,13 +550,13 @@ const BookingModule = () => {
                     </select>
                   </div>
                 )}
-                {bookingSource === 'Direct' && directCustomerType === 'Reference' && (
+                {sourceCategory === 'Direct' && directCustomerType === 'Reference' && (
                   <>
                     <div className="form-group"><label>Referred By Name</label><input type="text" className="form-control" /></div>
                     <div className="form-group"><label>Referred By Mobile</label><input type="text" className="form-control" /></div>
                   </>
                 )}
-                {bookingSource === 'Direct' && directCustomerType === 'Old Customer' && (
+                {sourceCategory === 'Direct' && directCustomerType === 'Old Customer' && (
                   <>
                     <div className="form-group" style={{gridColumn: 'span 2'}}>
                       <label>Search Old Customer (Mobile No.)</label>
@@ -571,13 +572,13 @@ const BookingModule = () => {
                     </div>
                   </>
                 )}
-                {['Vendor', 'Group', 'MYF', 'Taxi Sanchalak'].includes(bookingSource) && (
+                {['Vendor', 'Group', 'MYF', 'Taxi Sanchalak'].includes(sourceCategory) && (
                   <>
                     <div className="form-group"><label>Source Vendor Name</label><input type="text" className="form-control" /></div>
                     <div className="form-group"><label>Source Vendor Mobile</label><input type="text" className="form-control" /></div>
                   </>
                 )}
-                {bookingSource === 'Savaari' && (
+                {sourceCategory === 'Savaari' && (
                   <>
                     <div className="form-group">
                       <label>Panel Owner</label>
@@ -588,7 +589,7 @@ const BookingModule = () => {
                     <div className="form-group"><label>Savaari Booking ID</label><input type="text" className="form-control" /></div>
                   </>
                 )}
-                {bookingSource === 'Taxi Sanchalak' && (
+                {sourceCategory === 'Taxi Sanchalak' && (
                   <div className="form-group"><label>Platform Name</label><input type="text" className="form-control" /></div>
                 )}
               </div>
@@ -728,14 +729,14 @@ const BookingModule = () => {
               
               <div className="form-grid form-grid-3">
                 {/* Standard My Amount for Direct, Savaari, Group, Vendor, Other */}
-                {['Direct', 'Savaari', 'Group', 'Vendor', 'Other', 'Taxi Sanchalak'].includes(bookingSource) && (
+                {['Direct', 'Savaari', 'Group', 'Vendor', 'Other', 'Taxi Sanchalak'].includes(sourceCategory) && (
                   <div className="form-group">
                     <label>My Amount (Accepted Booking Amt)</label>
                     <input type="number" name="myAmount" value={fin.myAmount} onChange={handleFinChange} className="form-control" style={{background:'#F0FDF4', borderColor:'#86EFAC'}} />
                   </div>
                 )}
                 
-                {bookingSource === 'MYF' && (
+                {sourceCategory === 'MYF' && (
                   <>
                     <div className="form-group"><label>Total Booking Amount</label><input type="number" name="totalBookingAmount" value={fin.totalBookingAmount} onChange={handleFinChange} className="form-control" /></div>
                     <div className="form-group"><label>Commission %</label><input type="number" name="commissionPercentage" value={fin.commissionPercentage} onChange={handleFinChange} className="form-control" /></div>
@@ -887,7 +888,7 @@ const BookingModule = () => {
                 </div>
 
                 <div>
-                  <div className="metric-row"><span className="metric-label">Booking Source</span><span className="metric-val">{bookingSource}</span></div>
+                  <div className="metric-row"><span className="metric-label">Booking Source</span><span className="metric-val">{sourceCategory}</span></div>
                   <div className="metric-row"><span className="metric-label">Service Vehicle Type</span><span className="metric-val">{serviceVehicleType}</span></div>
                   <div className="metric-row"><span className="metric-label">Driver / Vehicle Ownership</span><span className="metric-val">{driverOwnership} / {vehicleOwnership}</span></div>
                   <div className="metric-row"><span className="metric-label">Accepted Booking Amount</span><span className="metric-val">₹{acceptedBookingAmount.toLocaleString('en-IN')}</span></div>

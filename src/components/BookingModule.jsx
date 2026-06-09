@@ -14,90 +14,7 @@ const BookingModule = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
-  const [bookingIdLabel, setBookingIdLabel] = useState("");
-
-  // 1 & 2. Source and Vehicle Type
-  const [sourceCategory, setSourceCategory] = useState('Direct');
-  const [directCustomerType, setDirectCustomerType] = useState('New Customer');
-  const [sourceName, setSourceName] = useState('');
-  const [applicationName, setApplicationName] = useState('');
-  const [groupName, setGroupName] = useState('');
-  const [advance, setAdvance] = useState({ paytm: '', status: 'Pending', date: '', notes: '' });
-
-  const [serviceVehicleType, setServiceVehicleType] = useState('Our Vehicle');
-  
-  // 3. Driver/Vehicle Ownership
-  const [driverOwnership, setDriverOwnership] = useState('Our Driver');
-  const [vehicleOwnership, setVehicleOwnership] = useState('Our Vehicle');
-
-  // Basic States
-  const [basic, setBasic] = useState({ 
-    status: 'Pending', date: new Date().toISOString().split('T')[0], pickupDate: '', pickupTime: '', 
-    tripType: 'One-Way Outstation', rentalPackage: '', pickup: '', drop: '', route: '', days: '', notes: ''
-  });
-  const [coveredLocations, setCoveredLocations] = useState([]);
-  const [customer, setCustomer] = useState({ name: '', mobile: '', altMobile: '', email: '' });
-  const [vendor, setVendor] = useState({ name: '', mobile: '', panelOwner: '', platformName: '' });
-  const [driver, setDriver] = useState({ name: '', mobile: '', vehicleNo: '', model: '', brand: '', category: 'Sedan', fuel: 'Petrol' });
-  
-  const [fin, setFin] = useState({ 
-    customerTotalAmount: '',
-    myAmount: '', vendorOrDriverAmount: '', 
-    commissionPercentage: '', commissionAmount: '', totalBookingAmount: '',
-    vendorAcceptedAmount: '', vendorFinalAmount: ''
-  });
-
-  const toTitleCase = (str) => {
-    if (!str) return '';
-    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-  };
-
-  const formatVehicleNumber = (val) => {
-    let raw = val.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-    if (raw.length === 0) return '';
-    if (raw.length <= 2) return raw;
-    if (raw.length <= 4) return `${raw.slice(0,2)}-${raw.slice(2)}`;
-    let letters = raw.slice(4).replace(/[0-9]/g, '');
-    let numbers = raw.slice(4).replace(/[^0-9]/g, '');
-    let res = `${raw.slice(0,2)}-${raw.slice(2,4)}`;
-    if (letters) res += `-${letters}`;
-    if (numbers) res += `-${numbers.slice(0,4)}`;
-    return res;
-  };
-
-  // 4. Cash Collection
-  const [collection, setCollection] = useState({
-    doneBy: 'Our Driver', mode: 'Mixed',
-    cash: '', paytm: '', upi: '', bank: ''
-  });
-
-  // 5. Extra Collection
-  const [extra, setExtra] = useState({ received: 'No', receivedAmount: '' });
-
-  const [cngEntries, setCngEntries] = useState([]);
-  const [tollEntries, setTollEntries] = useState([]);
-  const [expenses, setExpenses] = useState([
-    { id: 2, type: 'Petrol Filled', amount: '' },
-    { id: 3, type: 'Petrol Running KM', amount: '' },
-    { id: 5, type: 'State Tax', amount: '' },
-    { id: 6, type: 'Parking', amount: '' },
-import React, { useState } from 'react';
-import Sidebar from './Sidebar';
-import TopNav from './TopNav';
-import '../dashboard.css';
-import '../booking.css';
-import { 
-  FileText, User, Briefcase, Car, Wallet, Calculator, CheckCircle2,
-  Plus, Trash2, Save, FileSpreadsheet, PlusCircle, ArrowRight, Eye, Edit3, ShieldAlert
-} from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-const BookingModule = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const isEditMode = Boolean(id);
-  const [bookingIdLabel, setBookingIdLabel] = useState("");
+  const [bookingIdLabel, setBookingIdLabel] = useState(`UT-2026-${Date.now()}`);
 
   // 1 & 2. Source and Vehicle Type
   const [sourceCategory, setSourceCategory] = useState('Direct');
@@ -170,44 +87,9 @@ const BookingModule = () => {
   ]);
   const [showManualExpense, setShowManualExpense] = useState(false);
 
-  const generateNewBookingId = async () => {
-    const now = new Date();
-    const yy = String(now.getFullYear()).slice(-2);
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const prefix = `UT${yy}${mm}`;
-
-    try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('booking_id')
-        .like('booking_id', `${prefix}%`)
-        .order('booking_id', { ascending: false })
-        .limit(1);
-        
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const lastId = data[0].booking_id;
-        const seriesStr = lastId.replace(prefix, '');
-        const seriesNum = parseInt(seriesStr, 10);
-        if (!isNaN(seriesNum)) {
-          const newSeries = String(seriesNum + 1).padStart(3, '0');
-          setBookingIdLabel(`${prefix}${newSeries}`);
-          return;
-        }
-      }
-      setBookingIdLabel(`${prefix}001`);
-    } catch (err) {
-      console.error("Error generating booking ID:", err);
-      setBookingIdLabel(`${prefix}001`);
-    }
-  };
-
   useEffect(() => {
     if (isEditMode) {
       fetchBookingDetails();
-    } else {
-      generateNewBookingId();
     }
   }, [id]);
 
@@ -1194,7 +1076,6 @@ const BookingModule = () => {
 };
 
 export default BookingModule;
-
 
 
 

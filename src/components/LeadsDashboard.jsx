@@ -108,8 +108,7 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <Helmet><title>Admin Login | Urgent Taxis</title></Helmet>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
             <div className="flex justify-center mb-6">
@@ -149,7 +148,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Helmet><title>Lead Dashboard | Urgent Taxis</title></Helmet>
       
       {/* Top Navigation */}
       <nav className="bg-white border-b border-gray-200">

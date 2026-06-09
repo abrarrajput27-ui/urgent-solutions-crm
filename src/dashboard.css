@@ -632,7 +632,7 @@
   .dashboard-layout, .main-content { height: auto !important; min-height: 100vh !important; min-height: 100dvh !important; overflow: visible !important; }
   .dashboard-content { height: auto !important; overflow: visible !important; }
   /* NEW BOOKING MOBILE FIX */
-  .form-grid-2, .form-grid-3 { display: flex !important; flex-direction: column !important; gap: 1rem !important; }
+  .form-grid-3 { display: flex !important; flex-direction: column !important; gap: 1rem !important; }
   .trip-expense-row { flex-direction: column !important; align-items: stretch !important; gap: 0.5rem !important; }
   .trip-expense-row > div { width: 100% !important; }
   .live-calc-panel { position: static !important; width: 100% !important; margin-top: 1rem; }
@@ -757,8 +757,14 @@
 
 /* NEW BOOKING MOBILE OVERFLOW FIX */
 @media (max-width: 768px) {
+  .booking-form-col .form-grid-2 {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.8rem !important;
+    width: 100% !important;
+  }
+
   .booking-form-col .form-grid,
-  .booking-form-col .form-grid-2,
   .booking-form-col .form-grid-3,
   .booking-form-col .form-grid-4,
   .booking-form-col .form-section > div[style*="display: grid"],
@@ -801,7 +807,7 @@
 
 @media (max-width: 768px) {
   .booking-form-col .form-grid,
-  .booking-form-col .form-grid-2,
+  
   .booking-form-col .form-grid-3,
   .booking-form-col .form-grid-4,
   .booking-form-col .form-section > div[style*="display: grid"],
@@ -810,6 +816,7 @@
     gap: 1rem !important;
   }
 }
+
 
 
 

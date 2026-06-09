@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import { Lock, LogOut, CheckCircle, Clock, XCircle, Search, Edit2, Calendar } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
 
 const LEAD_STATUSES = ['New', 'Contacted', 'Quote Sent', 'Follow Up', 'Converted', 'Lost'];
 

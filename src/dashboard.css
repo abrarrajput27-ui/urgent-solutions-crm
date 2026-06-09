@@ -799,3 +799,15 @@
     justify-content: center !important;
   }
 }
+
+@media (max-width: 768px) {
+  .booking-form-col .form-grid,
+  .booking-form-col .form-grid-2,
+  .booking-form-col .form-grid-3,
+  .booking-form-col .form-grid-4,
+  .booking-form-col .form-section > div[style*="display: grid"],
+  .booking-form-col .collection-grid,
+  .booking-form-col .recovery-grid {
+    gap: 1rem !important;
+  }
+}

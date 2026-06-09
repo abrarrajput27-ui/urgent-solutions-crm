@@ -41,10 +41,29 @@ const BookingModule = () => {
   const [driver, setDriver] = useState({ name: '', mobile: '', vehicleNo: '', model: '', brand: '', category: 'Sedan', fuel: 'Petrol' });
   
   const [fin, setFin] = useState({ 
+    customerTotalAmount: '',
     myAmount: '', vendorOrDriverAmount: '', 
     commissionPercentage: '', commissionAmount: '', totalBookingAmount: '',
     vendorAcceptedAmount: '', vendorFinalAmount: ''
   });
+
+  const toTitleCase = (str) => {
+    if (!str) return '';
+    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+  };
+
+  const formatVehicleNumber = (val) => {
+    let raw = val.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (raw.length === 0) return '';
+    if (raw.length <= 2) return raw;
+    if (raw.length <= 4) return `${raw.slice(0,2)}-${raw.slice(2)}`;
+    let letters = raw.slice(4).replace(/[0-9]/g, '');
+    let numbers = raw.slice(4).replace(/[^0-9]/g, '');
+    let res = `${raw.slice(0,2)}-${raw.slice(2,4)}`;
+    if (letters) res += `-${letters}`;
+    if (numbers) res += `-${numbers.slice(0,4)}`;
+    return res;
+  };
 
   // 4. Cash Collection
   const [collection, setCollection] = useState({
@@ -136,8 +155,9 @@ const BookingModule = () => {
         });
 
         setFin({
+          customerTotalAmount: data.customer_total_amount || '',
           myAmount: data.my_amount || '',
-          vendorOrDriverAmount: data.vendor_amount || data.driver_amount || '',
+          vendorOrDriverAmount: data.vendor_or_driver_amount || data.vendor_amount || data.driver_amount || '',
           commissionPercentage: data.commission_percentage || '',
           commissionAmount: data.commission_amount || '',
           totalBookingAmount: data.total_booking_amount || '',
@@ -359,7 +379,7 @@ const BookingModule = () => {
       vendor_name: vendor.name,
       vendor_mobile: vendor.mobile,
       panel_owner: vendor.panelOwner,
-      platform_name: vendor.platformName,
+      vendor_platform_name: vendor.platformName,
       
       driver_name: driver.name,
       driver_mobile: driver.mobile,
@@ -369,8 +389,9 @@ const BookingModule = () => {
       vehicle_category: driver.category,
       fuel_type: driver.fuel,
       
+      customer_total_amount: parseFloat(fin.customerTotalAmount) || 0,
       my_amount: parseFloat(fin.myAmount) || 0,
-      vendor_amount: parseFloat(fin.vendorOrDriverAmount) || 0,
+      vendor_or_driver_amount: parseFloat(fin.vendorOrDriverAmount) || 0,
       driver_amount: driverOwnership === 'Outside Driver' ? (parseFloat(fin.vendorOrDriverAmount) || 0) : 0,
       total_booking_amount: parseFloat(fin.totalBookingAmount) || 0,
       commission_percentage: parseFloat(fin.commissionPercentage) || 0,
@@ -686,7 +707,7 @@ const BookingModule = () => {
                 <User size={18} /> Customer Details
               </div>
               <div className="form-grid form-grid-2">
-                <div className="form-group"><label>Customer Name</label><input type="text" className="form-control" placeholder="Full Name" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} /></div>
+                <div className="form-group"><label>Customer Name</label><input type="text" className="form-control" placeholder="Full Name" value={customer.name} onChange={e => setCustomer({...customer, name: toTitleCase(e.target.value)})} /></div>
                 <div className="form-group">
                   <label>Customer Mobile</label>
                   <div style={{display:'flex', gap:'0.5rem'}}>
@@ -720,7 +741,7 @@ const BookingModule = () => {
               </div>
 
               <div className="form-grid form-grid-3">
-                <div className="form-group"><label>Driver Name</label><input type="text" className="form-control" value={driver.name} onChange={e => setDriver({...driver, name: e.target.value})} /></div>
+                <div className="form-group"><label>Driver Name</label><input type="text" className="form-control" value={driver.name} onChange={e => setDriver({...driver, name: toTitleCase(e.target.value)})} /></div>
                 <div className="form-group">
                   <label>Driver Mobile</label>
                   <div style={{display:'flex', gap:'0.5rem'}}>
@@ -728,8 +749,8 @@ const BookingModule = () => {
                     <button onClick={fetchDriverByMobile} type="button" className="btn-modal-secondary" style={{padding:'0 1rem', borderRadius:'6px', cursor:'pointer', fontWeight:'600'}}>Fetch</button>
                   </div>
                 </div>
-                <div className="form-group"><label>Vehicle Number</label><input type="text" className="form-control" value={driver.vehicleNo} onChange={e => setDriver({...driver, vehicleNo: e.target.value})} /></div>
-                <div className="form-group"><label>Vehicle Model</label><input type="text" className="form-control" value={driver.model} onChange={e => setDriver({...driver, model: e.target.value})} /></div>
+                <div className="form-group"><label>Vehicle Number</label><input type="text" className="form-control" value={driver.vehicleNo} onChange={e => setDriver({...driver, vehicleNo: formatVehicleNumber(e.target.value)})} /></div>
+                <div className="form-group"><label>Vehicle Model</label><input type="text" className="form-control" value={driver.model} onChange={e => setDriver({...driver, model: toTitleCase(e.target.value)})} /></div>
                 <div className="form-group"><label>Category</label><select className="form-control" value={driver.category} onChange={e => setDriver({...driver, category: e.target.value})}><option>Sedan</option><option>SUV</option><option>Hatchback</option></select></div>
                 {isOurVehicle && (
                   <div className="form-group"><label>Fuel Type</label><select className="form-control" value={driver.fuel} onChange={e => setDriver({...driver, fuel: e.target.value})}><option>Petrol</option><option>Diesel</option><option>CNG</option><option>EV</option></select></div>
@@ -744,6 +765,10 @@ const BookingModule = () => {
               </div>
               
               <div className="form-grid form-grid-3">
+                <div className="form-group">
+                  <label>Customer Total Amount</label>
+                  <input type="number" name="customerTotalAmount" value={fin.customerTotalAmount} onChange={handleFinChange} className="form-control" style={{background:'#FFFBEB', borderColor:'#FDE68A'}} />
+                </div>
                 {/* Standard My Amount for Direct, Savaari, Group, Vendor, Other */}
                 {['Direct', 'Savaari', 'Group', 'Vendor', 'Other', 'Taxi Sanchalak'].includes(sourceCategory) && (
                   <div className="form-group">
@@ -846,6 +871,42 @@ const BookingModule = () => {
               ) : (
                 <>
                   <div style={{maxWidth: '500px'}}>
+                    
+                    {/* CNG Entries */}
+                    <div style={{marginBottom:'1.5rem', background:'#F8FAFC', padding:'1rem', borderRadius:'8px', border:'1px solid #E2E8F0'}}>
+                      <div style={{fontWeight:'600', fontSize:'0.9rem', marginBottom:'0.75rem', color:'#1E293B'}}>CNG Entries</div>
+                      {cngEntries.map((cng, i) => (
+                        <div className="expense-row" key={`cng-${i}`} style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
+                          <input type="text" className="form-control" placeholder="CNG Location/Notes" value={cng.notes||''} onChange={e => {
+                            const newArr = [...cngEntries]; newArr[i].notes = e.target.value; setCngEntries(newArr);
+                          }} style={{flex:2}} />
+                          <input type="number" className="form-control" placeholder="₹ Amount" value={cng.amount||''} onChange={e => {
+                            const newArr = [...cngEntries]; newArr[i].amount = e.target.value; setCngEntries(newArr);
+                          }} style={{flex:1}} />
+                          <button className="btn-remove-expense" onClick={() => setCngEntries(cngEntries.filter((_, idx)=>idx!==i))} style={{flexShrink:0}}><Trash2 size={16}/></button>
+                        </div>
+                      ))}
+                      <button className="btn-add-expense" onClick={() => setCngEntries([...cngEntries, {notes:'', amount:''}])}><Plus size={14} /> Add CNG</button>
+                    </div>
+
+                    {/* Toll Entries */}
+                    <div style={{marginBottom:'1.5rem', background:'#F8FAFC', padding:'1rem', borderRadius:'8px', border:'1px solid #E2E8F0'}}>
+                      <div style={{fontWeight:'600', fontSize:'0.9rem', marginBottom:'0.75rem', color:'#1E293B'}}>Toll Entries</div>
+                      {tollEntries.map((toll, i) => (
+                        <div className="expense-row" key={`toll-${i}`} style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
+                          <input type="text" className="form-control" placeholder="Toll Name" value={toll.name||''} onChange={e => {
+                            const newArr = [...tollEntries]; newArr[i].name = e.target.value; setTollEntries(newArr);
+                          }} style={{flex:2}} />
+                          <input type="number" className="form-control" placeholder="₹ Amount" value={toll.amount||''} onChange={e => {
+                            const newArr = [...tollEntries]; newArr[i].amount = e.target.value; setTollEntries(newArr);
+                          }} style={{flex:1}} />
+                          <button className="btn-remove-expense" onClick={() => setTollEntries(tollEntries.filter((_, idx)=>idx!==i))} style={{flexShrink:0}}><Trash2 size={16}/></button>
+                        </div>
+                      ))}
+                      <button className="btn-add-expense" onClick={() => setTollEntries([...tollEntries, {name:'', amount:''}])}><Plus size={14} /> Add Toll</button>
+                    </div>
+
+                    <div style={{fontWeight:'600', fontSize:'0.9rem', marginBottom:'0.75rem', color:'#1E293B'}}>Other Trip Expenses</div>
                     {expenses.map((ex) => (
                       <div className="expense-row" key={ex.id}>
                         <input type="text" className="form-control" value={ex.type} onChange={(e) => {

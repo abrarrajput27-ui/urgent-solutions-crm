@@ -387,7 +387,7 @@ const BookingModule = () => {
       vendor_name: vendor.name,
       vendor_mobile: vendor.mobile,
       panel_owner: vendor.panelOwner,
-      vendor_platform_name: vendor.platformName,
+      platform_name: vendor.platformName,
       
       driver_name: driver.name,
       driver_mobile: driver.mobile,
@@ -1076,6 +1076,7 @@ const BookingModule = () => {
 };
 
 export default BookingModule;
+
 
 
 

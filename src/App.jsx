@@ -9,14 +9,7 @@ import Customers from './components/Customers';
 import CustomerDetail from './components/CustomerDetail';
 import Drivers from './components/Drivers';
 import DriverDetail from './components/DriverDetail';
-import LeadsDashboard from './components/LeadsDashboard';
-import ComingSoon from './components/ComingSoon';
 import './index.css';
-
-const ProtectedRoute = ({ children }) => {
-  const isAuth = sessionStorage.getItem('adminAuth') === 'true';
-  return isAuth ? children : <Navigate to="/login" />;
-};
 
 const NotFound = () => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F8FAFC', textAlign: 'center' }}>
@@ -33,23 +26,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        
-        {/* Protected Routes */}
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/leads" element={<ProtectedRoute><LeadsDashboard /></ProtectedRoute>} />
-        <Route path="/coming-soon" element={<ProtectedRoute><ComingSoon /></ProtectedRoute>} />
-        
-        {/* Legacy / Disabled Routes */}
-        <Route path="/bookings" element={<ProtectedRoute><BookingModule /></ProtectedRoute>} />
-        <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
-        <Route path="/bookings/:id/edit" element={<ProtectedRoute><BookingModule /></ProtectedRoute>} />
-        <Route path="/all-bookings" element={<ProtectedRoute><AllBookings /></ProtectedRoute>} />
-        <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
-        <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetail /></ProtectedRoute>} />
-        <Route path="/drivers" element={<ProtectedRoute><Drivers /></ProtectedRoute>} />
-        <Route path="/drivers/:id" element={<ProtectedRoute><DriverDetail /></ProtectedRoute>} />
-        
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/bookings" element={<BookingModule />} />
+        <Route path="/bookings/:id" element={<BookingDetail />} />
+        <Route path="/bookings/:id/edit" element={<BookingModule />} />
+        <Route path="/all-bookings" element={<AllBookings />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/customers/:id" element={<CustomerDetail />} />
+        <Route path="/drivers" element={<Drivers />} />
+        <Route path="/drivers/:id" element={<DriverDetail />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

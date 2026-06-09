@@ -227,9 +227,9 @@ const AllBookings = () => {
                 No bookings found matching your criteria.
               </div>
             ) : (
-              <div className="bookings-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem', width: '100%' }}>
+              <div className="bookings-grid" style={{ display: "grid", gap: "1.5rem", width: "100%" }}>
                 {sortedBookings.map((b) => (
-                  <div key={b.id} style={{ background: 'white', borderRadius: '16px', border: '1px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column' }}>
+                  <div key={b.id} className="booking-card" style={{ background: "white", borderRadius: "16px", border: "1px solid #E2E8F0", overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.04)", display: "flex", flexDirection: "column", width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
                     
                     {/* ROW 1: ID & Status */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #F1F5F9', background: '#F8FAFC' }}>
@@ -259,7 +259,7 @@ const AllBookings = () => {
                         <div>
                           <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Pickup</div>
                           <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#334155' }}>
-                            {b.pickup_datetime ? new Date(b.pickup_datetime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : (b.booking_date || 'N/A')}
+                            {b.pickup_datetime ? new Date(b.pickup_datetime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : (b.booking_date || 'Not Added')}
                           </div>
                         </div>
                         <div>
@@ -283,7 +283,7 @@ const AllBookings = () => {
                       </div>
 
                       {/* ROW 5: Financial Summary */}
-                      <div className="responsive-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div className="responsive-grid-3" style={{ display: "grid", gap: "0.75rem", marginBottom: "1.5rem" }}>
                         <div style={{ background: '#F8FAFC', padding: '0.75rem', borderRadius: '10px' }}>
                           <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.2rem' }}>My Amount</div>
                           <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#0F172A' }}>₹{b.my_amount?.toLocaleString() || 0}</div>
@@ -320,7 +320,7 @@ const AllBookings = () => {
                       </div>
 
                       {/* ROW 8: Actions */}
-                      <div className="action-buttons-grid" style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                      <div className="action-buttons-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(80px, 1fr))", gap: "0.5rem", marginTop: "auto", width: "100%", overflowWrap: "anywhere" }}>
                         <button 
                           onClick={() => navigate(`/bookings/${b.id}`)}
                           style={{ flex: 1, background: '#EFF6FF', color: '#2563EB', border: 'none', padding: '0.75rem', borderRadius: '8px', fontWeight: '700', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
@@ -374,3 +374,4 @@ const AllBookings = () => {
 };
 
 export default AllBookings;
+

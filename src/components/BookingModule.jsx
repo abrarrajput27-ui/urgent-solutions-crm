@@ -165,7 +165,7 @@ const BookingModule = () => {
         setFin({
           customerTotalAmount: data.total_booking_amount || '',
           myAmount: data.my_amount || '',
-          vendorOrDriverAmount: data.vendor_or_driver_amount || data.vendor_amount || data.driver_amount || '',
+          vendorOrDriverAmount: data.vendor_amount || data.driver_amount || '',
           commissionPercentage: data.commission_percentage || '',
           commissionAmount: data.commission_amount || '',
           totalBookingAmount: data.total_booking_amount || '',
@@ -399,7 +399,7 @@ const BookingModule = () => {
       
       
       my_amount: parseFloat(fin.myAmount) || 0,
-      vendor_or_driver_amount: parseFloat(fin.vendorOrDriverAmount) || 0,
+      vendor_amount: serviceVehicleType === 'Outsider / Arranged Vehicle' ? (parseFloat(fin.vendorOrDriverAmount) || 0) : 0,
       driver_amount: driverOwnership === 'Outside Driver' ? (parseFloat(fin.vendorOrDriverAmount) || 0) : 0,
       total_booking_amount: parseFloat(fin.totalBookingAmount) || parseFloat(fin.customerTotalAmount) || 0,
       commission_percentage: parseFloat(fin.commissionPercentage) || 0,
@@ -1076,6 +1076,7 @@ const BookingModule = () => {
 };
 
 export default BookingModule;
+
 
 
 

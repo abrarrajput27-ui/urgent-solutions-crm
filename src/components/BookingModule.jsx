@@ -35,7 +35,7 @@ const BookingModule = () => {
     status: 'Pending', date: new Date().toISOString().split('T')[0], pickupDate: '', pickupTime: '', 
     tripType: 'One-Way Outstation', rentalPackage: '', pickup: '', drop: '', route: '', days: '', notes: ''
   });
-  const [coveredLocations, setCoveredLocations] = useState([]);
+  
   const [customer, setCustomer] = useState({ name: '', mobile: '', altMobile: '', email: '' });
   const [vendor, setVendor] = useState({ name: '', mobile: '', panelOwner: '', platformName: '' });
   const [driver, setDriver] = useState({ name: '', mobile: '', vehicleNo: '', model: '', brand: '', category: 'Sedan', fuel: 'Petrol' });
@@ -171,7 +171,7 @@ const BookingModule = () => {
           notes: data.notes || ''
         });
         
-        setCoveredLocations(Array.isArray(data.covered_locations) ? data.covered_locations : []);
+        
 
         setCustomer({
           name: data.customer_name || '',
@@ -362,8 +362,8 @@ const BookingModule = () => {
 
   // --- ROUTE AUTOGENERATION ---
   let generatedRoute = basic.pickup || 'Pickup';
-  if (basic.tripType === 'Round-Trip Outstation' && coveredLocations.length > 0) {
-    const validStops = coveredLocations.map(c => c.location).filter(s => s.trim() !== '');
+  if (basic.tripType === 'Round-Trip Outstation' && basic.stops && basic.stops.length > 0) {
+    const validStops = basic.stops.filter(s => s && s.trim() !== '');
     if (validStops.length > 0) {
       generatedRoute += ' -> ' + validStops.join(' -> ');
     }
@@ -410,7 +410,7 @@ const BookingModule = () => {
       number_of_days: parseInt(basic.days) || 1,
       pickup_location: basic.pickup,
       drop_location: basic.drop,
-      covered_locations: coveredLocations,
+      covered_locations: basic.stops || [],
       route: generatedRoute,
       notes: basic.notes,
       

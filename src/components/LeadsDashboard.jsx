@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { Lock, LogOut, CheckCircle, Clock, XCircle, Search, Edit2, Calendar } from 'lucide-react';
-import Sidebar from './Sidebar';
-import TopNav from './TopNav';
-import '../dashboard.css';
+import { Helmet } from 'react-helmet-async';
 
 const LEAD_STATUSES = ['New', 'Contacted', 'Quote Sent', 'Follow Up', 'Converted', 'Lost'];
 
@@ -26,17 +23,41 @@ const StatusBadge = ({ status }) => {
 };
 
 export default function AdminDashboard() {
-  const [searchParams] = useSearchParams();
-  const statusFilter = searchParams.get('status');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
   
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLead, setSelectedLead] = useState(null);
   const [fetchError, setFetchError] = useState(null);
 
+  // Authentication check
   useEffect(() => {
-    fetchLeads();
+    const authStatus = sessionStorage.getItem('adminAuth');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+      fetchLeads();
+    }
   }, []);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const correctPin = import.meta.env.VITE_ADMIN_PIN || '7310';
+    if (pin === correctPin) {
+      sessionStorage.setItem('adminAuth', 'true');
+      setIsAuthenticated(true);
+      fetchLeads();
+    } else {
+      setError('Invalid PIN');
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuth');
+    setIsAuthenticated(false);
+    setLeads([]);
+  };
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -86,18 +107,70 @@ export default function AdminDashboard() {
     }
   };
 
-  const filteredLeads = React.useMemo(() => {
-    if (!statusFilter || statusFilter === 'All') return leads;
-    if (statusFilter === 'New') return leads.filter(l => !l.status || l.status === 'New');
-    return leads.filter(l => l.status === statusFilter);
-  }, [leads, statusFilter]);
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <Helmet><title>Admin Login | Urgent Taxis</title></Helmet>
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <Lock className="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+            <h2 className="mt-2 text-center text-2xl font-bold text-gray-900 mb-8">Admin Access</h2>
+            
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Enter Admin PIN</label>
+                <div className="mt-1">
+                  <input
+                    type="password"
+                    value={pin}
+                    onChange={(e) => { setPin(e.target.value); setError(''); }}
+                    className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-center text-2xl tracking-widest"
+                    autoFocus
+                  />
+                </div>
+                {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-black focus:outline-none"
+              >
+                Access Dashboard
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="dashboard-layout">
-      <Sidebar />
-      <div className="main-content">
-        <TopNav />
-        <div className="dashboard-content p-6">
+    <div className="min-h-screen bg-gray-50">
+      <Helmet><title>Lead Dashboard | Urgent Taxis</title></Helmet>
+      
+      {/* Top Navigation */}
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold text-gray-900">Urgent Taxis CRM</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-500 font-medium">Logged in</span>
+              <button onClick={handleLogout} className="text-gray-400 hover:text-gray-600">
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -134,9 +207,7 @@ export default function AdminDashboard() {
         {/* Data Table */}
         <div className="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="text-lg font-bold text-gray-900">
-              {statusFilter ? `${statusFilter} Leads` : 'Recent Leads'}
-            </h3>
+            <h3 className="text-lg font-bold text-gray-900">Recent Leads</h3>
             <button onClick={fetchLeads} className="text-sm text-blue-600 font-medium hover:text-blue-800">
               Refresh
             </button>
@@ -170,10 +241,10 @@ export default function AdminDashboard() {
                       </div>
                     </td>
                   </tr>
-                ) : filteredLeads.length === 0 ? (
-                  <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-500">No leads found for this view.</td></tr>
+                ) : leads.length === 0 ? (
+                  <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-500">No leads found in database.</td></tr>
                 ) : (
-                  filteredLeads.map((lead) => {
+                  leads.map((lead) => {
                     const customerName = lead.name || lead.customer_name || "Unknown";
                     const mobile = lead.mobile || lead.phone || lead.customer_mobile || "Not provided";
                     const pickup = lead.pickup || lead.pickup_location || lead.from || "Pickup not provided";
@@ -417,8 +488,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-        </div>
-      </div>
+    </div>
   );
 }
 

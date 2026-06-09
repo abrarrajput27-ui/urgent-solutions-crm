@@ -24,7 +24,7 @@ const Login = () => {
       sessionStorage.setItem('adminAuth', 'true');
       setIsSuccess(true);
       setTimeout(() => {
-        navigate('/');
+        navigate('/dashboard');
       }, 1000);
     } else {
       setError('Invalid PIN');

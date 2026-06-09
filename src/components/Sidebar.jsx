@@ -25,15 +25,21 @@ const Sidebar = () => {
   const location = useLocation();
   
   const menuItems = [
-    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={18} />, active: location.pathname === '/' },
-    { name: 'Leads', path: '/leads', icon: <UserCog size={18} />, active: location.pathname === '/leads' },
-    { name: 'Bookings', path: '/coming-soon?module=Bookings', icon: <BookOpen size={18} /> },
-    { name: 'Customers', path: '/coming-soon?module=Customers', icon: <Users size={18} /> },
-    { name: 'Drivers', path: '/coming-soon?module=Drivers', icon: <Car size={18} /> },
-    { name: 'Vendors', path: '/coming-soon?module=Vendors', icon: <Briefcase size={18} /> },
-    { name: 'Finance', path: '/coming-soon?module=Finance', icon: <Wallet size={18} /> },
-    { name: 'Reports', path: '/coming-soon?module=Reports', icon: <FileText size={18} /> },
-    { name: 'Settings', path: '/coming-soon?module=Settings', icon: <Settings size={18} /> },
+    { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} />, active: location.pathname === '/dashboard' },
+    { name: 'New Booking', path: '/bookings', icon: <PlusCircle size={18} />, active: location.pathname === '/bookings' },
+    { name: 'All Bookings', path: '/all-bookings', icon: <BookOpen size={18} />, active: location.pathname === '/all-bookings' },
+    { name: 'Customers', path: '/customers', icon: <Users size={18} />, active: location.pathname === '/customers' },
+    { name: 'Vendors', icon: <Briefcase size={18} /> },
+    { name: 'Drivers', path: '/drivers', icon: <Car size={18} />, active: location.pathname === '/drivers' },
+    { name: 'Recovery Ledger', icon: <Wallet size={18} /> },
+    { name: 'Expense Ledger', icon: <Banknote size={18} /> },
+    { name: 'Loan / Debt Ledger', icon: <CreditCard size={18} /> },
+    { name: 'EMI & Commitments', icon: <CalendarDays size={18} /> },
+    { name: 'Insurance Income', icon: <ShieldAlert size={18} /> },
+    { name: 'Reports', icon: <FileText size={18} /> },
+    { name: 'Reminders', icon: <BellRing size={18} />, badge: 5 },
+    { name: 'Settings', icon: <Settings size={18} /> },
+    { name: 'User Management', icon: <UserCog size={18} /> },
   ];
 
   return (
@@ -50,7 +56,7 @@ const Sidebar = () => {
           </svg>
         </div>
         <div className="sidebar-brand-text">
-          <div className="sidebar-logo-title">Urgent<span>Solutions</span></div>
+          <div className="sidebar-logo-title">Urgent<span>Taxis</span></div>
           <div className="sidebar-logo-subtitle">A Unit of Urgent Taxis</div>
         </div>
         <button 
@@ -88,21 +94,11 @@ const Sidebar = () => {
         ))}
       </div>
 
-      <div className="sidebar-footer" style={{ padding: '20px', borderTop: '1px solid #E2E8F0', marginTop: 'auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
-            <UserCog size={18} color="#64748B" />
-          </div>
-          <div>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0B192C' }}>Admin</div>
-            <div style={{ fontSize: '11px', color: '#64748B' }}>System Administrator</div>
-          </div>
-        </div>
+      <div className="sidebar-footer">
         <button className="logout-btn" onClick={() => {
-          sessionStorage.removeItem('adminAuth');
-          navigate('/login');
+          navigate('/');
           document.body.classList.remove('sidebar-open');
-        }} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0', fontSize: '14px', fontWeight: 500 }}>
+        }}>
           <LogOut size={18} />
           <span>Logout</span>
         </button>

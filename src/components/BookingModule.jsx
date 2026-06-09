@@ -14,7 +14,7 @@ const BookingModule = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
-  const [bookingIdLabel, setBookingIdLabel] = useState("");
+  const [bookingIdLabel, setBookingIdLabel] = useState(`UT-2026-${Date.now()}`);
 
   // 1 & 2. Source and Vehicle Type
   const [sourceCategory, setSourceCategory] = useState('Direct');
@@ -87,55 +87,12 @@ const BookingModule = () => {
   ]);
   const [showManualExpense, setShowManualExpense] = useState(false);
 
-  const generateNewBookingId = async () => {
-    const now = new Date();
-    const yy = String(now.getFullYear()).slice(-2);
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const prefix = `UT${yy}${mm}`;
-
-    try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('booking_id')
-        .like('booking_id', `${prefix}%`)
-        .order('booking_id', { ascending: false })
-        .limit(1);
-        
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const lastId = data[0].booking_id;
-        const seriesStr = lastId.replace(prefix, '');
-        const seriesNum = parseInt(seriesStr, 10);
-        if (!isNaN(seriesNum)) {
-          const newSeries = String(seriesNum + 1).padStart(3, '0');
-          setBookingIdLabel(`${prefix}${newSeries}`);
-          return;
-        }
-      }
-      setBookingIdLabel(`${prefix}001`);
-    } catch (err) {
-      console.error("Error generating booking ID:", err);
-      setBookingIdLabel(`${prefix}001`);
-    }
-  };
-
   useEffect(() => {
     if (isEditMode) {
       fetchBookingDetails();
-    } else {
-      generateNewBookingId();
     }
   }, [id]);
 
-    const combineDateAndTime = (date, time) => {
-    if (!date) return null;
-    let cleanDate = date.includes('T') ? date.split('T')[0] : date;
-    let cleanTime = time ? time : '00:00';
-    if (cleanTime.includes('T')) cleanTime = cleanTime.split('T')[1].substring(0, 5);
-    if (cleanTime.split(':').length === 2) cleanTime += ':00';
-    return cleanDate + 'T' + cleanTime;
-  };
   const fetchBookingDetails = async () => {
     try {
       const { data, error } = await supabase.from('bookings').select('*').eq('id', id).single();
@@ -198,9 +155,9 @@ const BookingModule = () => {
         });
 
         setFin({
-          customerTotalAmount: data.total_booking_amount || '',
+          customerTotalAmount: data.customer_total_amount || '',
           myAmount: data.my_amount || '',
-          vendorOrDriverAmount: data.vendor_amount || data.driver_amount || '',
+          vendorOrDriverAmount: data.vendor_or_driver_amount || data.vendor_amount || data.driver_amount || '',
           commissionPercentage: data.commission_percentage || '',
           commissionAmount: data.commission_amount || '',
           totalBookingAmount: data.total_booking_amount || '',
@@ -401,8 +358,8 @@ const BookingModule = () => {
       driver_ownership: driverOwnership,
       vehicle_ownership: vehicleOwnership,
       booking_status: basic.status,
-      booking_date: basic.date || null,
-      pickup_datetime: combineDateAndTime(basic.pickupDate, basic.pickupTime),
+      booking_date: basic.date,
+      pickup_datetime: basic.pickupDate && basic.pickupDate.includes('T') ? `${basic.pickupDate}:00` : basic.pickupDate ? `${basic.pickupDate}T${basic.pickupTime || '00:00'}:00` : null,
       pickup_date: basic.pickupDate || null,
       pickup_time: basic.pickupTime || null,
       trip_type: basic.tripType,
@@ -422,7 +379,7 @@ const BookingModule = () => {
       vendor_name: vendor.name,
       vendor_mobile: vendor.mobile,
       panel_owner: vendor.panelOwner,
-      platform_name: vendor.platformName,
+      vendor_platform_name: vendor.platformName,
       
       driver_name: driver.name,
       driver_mobile: driver.mobile,
@@ -432,11 +389,11 @@ const BookingModule = () => {
       vehicle_category: driver.category,
       fuel_type: driver.fuel,
       
-      
+      customer_total_amount: parseFloat(fin.customerTotalAmount) || 0,
       my_amount: parseFloat(fin.myAmount) || 0,
-      vendor_amount: serviceVehicleType === 'Outsider / Arranged Vehicle' ? (parseFloat(fin.vendorOrDriverAmount) || 0) : 0,
+      vendor_or_driver_amount: parseFloat(fin.vendorOrDriverAmount) || 0,
       driver_amount: driverOwnership === 'Outside Driver' ? (parseFloat(fin.vendorOrDriverAmount) || 0) : 0,
-      total_booking_amount: parseFloat(fin.totalBookingAmount) || parseFloat(fin.customerTotalAmount) || 0,
+      total_booking_amount: parseFloat(fin.totalBookingAmount) || 0,
       commission_percentage: parseFloat(fin.commissionPercentage) || 0,
       commission_amount: parseFloat(fin.commissionAmount) || 0,
       
@@ -603,7 +560,7 @@ const BookingModule = () => {
               </div>
 
               {/* Dynamic Source Fields */}
-              <div className="form-grid form-grid-2">
+              <div className="form-grid form-grid-3">
                 {sourceCategory === 'Direct' && (
                   <div className="form-group">
                     <label>Customer Type</label>
@@ -616,20 +573,20 @@ const BookingModule = () => {
                 )}
                 {sourceCategory === 'Direct' && directCustomerType === 'Reference' && (
                   <>
-                    <div className="form-group"><label>Referred By Name</label><input type="text" className="form-control" value={sourceName} onChange={e => setSourceName(e.target.value)} /></div>
+                    <div className="form-group"><label>Referred By Name</label><input type="text" className="form-control" /></div>
                     <div className="form-group"><label>Referred By Mobile</label><input type="text" className="form-control" /></div>
                   </>
                 )}
                 {sourceCategory === 'Direct' && directCustomerType === 'Old Customer' && (
                   <>
-                    <div className="form-group" style={{gridColumn: '1 / -1'}}>
+                    <div className="form-group" style={{gridColumn: 'span 2'}}>
                       <label>Search Old Customer (Mobile No.)</label>
                       <div style={{display:'flex', gap:'0.5rem'}}>
                         <input type="text" className="form-control" placeholder="Enter Mobile Number" style={{flex: 1}} />
                         <button className="btn-modal-secondary" style={{padding:'0 1rem', borderRadius:'6px', cursor:'pointer', fontWeight:'600'}}>Fetch Data</button>
                       </div>
                     </div>
-                    <div style={{gridColumn: '1 / -1', background:'#F0FDF4', padding:'0.75rem', borderRadius:'8px', border:'1px solid #86EFAC', fontSize:'0.85rem', color:'#166534', marginTop:'0.5rem'}}>
+                    <div style={{gridColumn: 'span 3', background:'#F0FDF4', padding:'0.75rem', borderRadius:'8px', border:'1px solid #86EFAC', fontSize:'0.85rem', color:'#166534', marginTop:'0.5rem'}}>
                       <strong>✓ Customer Found:</strong> Rahul Sharma (+91 9876543210)<br/>
                       <strong>Last Trip:</strong> 15-May-2026 | Delhi to Jaipur | Sedan<br/>
                       <strong>Previous Revenue:</strong> ₹1,500 | <strong>Rating:</strong> ⭐⭐⭐⭐⭐
@@ -638,7 +595,7 @@ const BookingModule = () => {
                 )}
                 {['Vendor', 'Group', 'MYF', 'Taxi Sanchalak'].includes(sourceCategory) && (
                   <>
-                    <div className="form-group"><label>Source Vendor Name</label><input type="text" className="form-control" value={sourceName} onChange={e => setSourceName(e.target.value)} /></div>
+                    <div className="form-group"><label>Source Vendor Name</label><input type="text" className="form-control" /></div>
                     <div className="form-group"><label>Source Vendor Mobile</label><input type="text" className="form-control" /></div>
                   </>
                 )}
@@ -665,11 +622,11 @@ const BookingModule = () => {
                         <option>Abrar</option><option>Imran</option><option>Shavej</option>
                       </select>
                     </div>
-                    <div className="form-group"><label>Savaari Booking ID</label><input type="text" className="form-control" value={sourceName} onChange={e => setSourceName(e.target.value)} /></div>
+                    <div className="form-group"><label>Savaari Booking ID</label><input type="text" className="form-control" /></div>
                   </>
                 )}
                 {sourceCategory === 'Taxi Sanchalak' && (
-                  <div className="form-group"><label>Platform Name</label><input type="text" className="form-control" value={applicationName} onChange={e => setApplicationName(e.target.value)} /></div>
+                  <div className="form-group"><label>Platform Name</label><input type="text" className="form-control" /></div>
                 )}
               </div>
             </div>
@@ -679,7 +636,7 @@ const BookingModule = () => {
               <div className="form-section-header">
                 <FileText size={18} /> Basic Booking Details
               </div>
-              <div className="form-grid form-grid-2">
+              <div className="form-grid form-grid-3">
                 <div className="form-group"><label>Booking ID</label><input type="text" className="form-control" value={bookingIdLabel} disabled /></div>
                 <div className="form-group">
                   <label>Booking Status</label>
@@ -703,7 +660,7 @@ const BookingModule = () => {
                 {basic.tripType === 'Local' && (
                   <div className="form-group">
                     <label>Local Package</label>
-                    <select className="form-control" value={basic.rentalPackage} onChange={e => setBasic({...basic, rentalPackage: e.target.value})}>
+                    <select className="form-control">
                       <option>4 Hr / 40 Km</option>
                       <option>6 Hr / 60 Km</option>
                       <option>8 Hr / 80 Km</option>
@@ -713,10 +670,10 @@ const BookingModule = () => {
                   </div>
                 )}
                 <div className="form-group"><label>Number of Days</label><input type="number" className="form-control" min="1" value={basic.days} onChange={e => setBasic({...basic, days: e.target.value})} /></div>
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}><label>Pickup Location</label><input type="text" className="form-control" placeholder="City / Complete Address" value={basic.pickup} onChange={e => setBasic({...basic, pickup: e.target.value})} /></div>
+                <div className="form-group" style={{ gridColumn: 'span 3' }}><label>Pickup Location</label><input type="text" className="form-control" placeholder="City / Complete Address" value={basic.pickup} onChange={e => setBasic({...basic, pickup: e.target.value})} /></div>
                 
                 {basic.tripType === 'Round-Trip Outstation' && (
-                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <div className="form-group" style={{ gridColumn: 'span 3' }}>
                     <label>Intermediate Stops</label>
                     {(basic.stops || []).map((stop, i) => (
                       <div key={i} style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
@@ -731,16 +688,16 @@ const BookingModule = () => {
                         }}><Trash2 size={16}/></button>
                       </div>
                     ))}
-                    
+                    <button className="btn-add-expense" onClick={() => setBasic({...basic, stops: [...(basic.stops||[]), '']})} style={{width: 'fit-content', padding: '0.4rem 0.8rem'}}><Plus size={14} /> Add Stop</button>
                   </div>
                 )}
 
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}><label>Drop Location</label><input type="text" className="form-control" placeholder="City / Complete Address" value={basic.drop} onChange={e => setBasic({...basic, drop: e.target.value})} /></div>
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}><label>Auto-Generated Route</label><input type="text" className="form-control" placeholder="Route will auto-generate..." value={generatedRoute} disabled style={{background:'#F1F5F9', color:'#334155', fontWeight:'600'}} /></div>
+                <div className="form-group" style={{ gridColumn: 'span 3' }}><label>Drop Location</label><input type="text" className="form-control" placeholder="City / Complete Address" value={basic.drop} onChange={e => setBasic({...basic, drop: e.target.value})} /></div>
+                <div className="form-group" style={{ gridColumn: 'span 3' }}><label>Auto-Generated Route</label><input type="text" className="form-control" placeholder="Route will auto-generate..." value={generatedRoute} disabled style={{background:'#F1F5F9', color:'#334155', fontWeight:'600'}} /></div>
               </div>
               <div className="form-group" style={{marginTop:'1rem'}}>
                 <label>Booking Notes</label>
-                <textarea className="form-control" rows="2" placeholder="Any special instructions..." value={basic.notes} onChange={e => setBasic({...basic, notes: e.target.value})}></textarea>
+                <textarea className="form-control" rows="2" placeholder="Any special instructions..."></textarea>
               </div>
             </div>
 
@@ -783,7 +740,7 @@ const BookingModule = () => {
                 </div>
               </div>
 
-              <div className="form-grid form-grid-2">
+              <div className="form-grid form-grid-3">
                 <div className="form-group"><label>Driver Name</label><input type="text" className="form-control" value={driver.name} onChange={e => setDriver({...driver, name: toTitleCase(e.target.value)})} /></div>
                 <div className="form-group">
                   <label>Driver Mobile</label>
@@ -807,7 +764,7 @@ const BookingModule = () => {
                 <Wallet size={18} /> Financial Details
               </div>
               
-              <div className="form-grid form-grid-2">
+              <div className="form-grid form-grid-3">
                 <div className="form-group">
                   <label>Customer Total Amount</label>
                   <input type="number" name="customerTotalAmount" value={fin.customerTotalAmount} onChange={handleFinChange} className="form-control" style={{background:'#FFFBEB', borderColor:'#FDE68A'}} />
@@ -859,7 +816,7 @@ const BookingModule = () => {
                 </div>
               </div>
 
-              <div className="form-grid form-grid-2">
+              <div className="form-grid form-grid-4">
                 <div className="form-group"><label>Cash</label><input type="number" name="cash" value={collection.cash} onChange={handleColChange} className="form-control" /></div>
                 <div className="form-group"><label>Paytm</label><input type="number" name="paytm" value={collection.paytm} onChange={handleColChange} className="form-control" /></div>
                 <div className="form-group"><label>UPI</label><input type="number" name="upi" value={collection.upi} onChange={handleColChange} className="form-control" /></div>
@@ -929,7 +886,7 @@ const BookingModule = () => {
                           <button className="btn-remove-expense" onClick={() => setCngEntries(cngEntries.filter((_, idx)=>idx!==i))} style={{flexShrink:0}}><Trash2 size={16}/></button>
                         </div>
                       ))}
-                      
+                      <button className="btn-add-expense" onClick={() => setCngEntries([...cngEntries, {notes:'', amount:''}])}><Plus size={14} /> Add CNG</button>
                     </div>
 
                     {/* Toll Entries */}
@@ -946,7 +903,7 @@ const BookingModule = () => {
                           <button className="btn-remove-expense" onClick={() => setTollEntries(tollEntries.filter((_, idx)=>idx!==i))} style={{flexShrink:0}}><Trash2 size={16}/></button>
                         </div>
                       ))}
-                      
+                      <button className="btn-add-expense" onClick={() => setTollEntries([...tollEntries, {name:'', amount:''}])}><Plus size={14} /> Add Toll</button>
                     </div>
 
                     <div style={{fontWeight:'600', fontSize:'0.9rem', marginBottom:'0.75rem', color:'#1E293B'}}>Other Trip Expenses</div>
@@ -959,7 +916,7 @@ const BookingModule = () => {
                         <button className="btn-remove-expense" onClick={() => removeExpense(ex.id)}><Trash2 size={16} /></button>
                       </div>
                     ))}
-                    
+                    <button className="btn-add-expense" onClick={addExpense}><Plus size={16} /> Add Multiple Expenses</button>
                   </div>
                   <div style={{marginTop: '1rem', fontWeight: '700', fontSize: '1rem', color: 'var(--primary-navy)'}}>
                     Total Trip Expenses: ₹{totalTripExpenses.toLocaleString('en-IN')}
@@ -973,7 +930,7 @@ const BookingModule = () => {
               <div className="form-section-header">
                 <CheckCircle2 size={18} /> Review System & Reminders
               </div>
-              <div className="form-grid form-grid-2">
+              <div className="form-grid form-grid-3">
                 <div className="form-group">
                   <label>Review Status</label>
                   <select className="form-control" value={review.status} onChange={e => setReview({...review, status: e.target.value})}>
@@ -1111,14 +1068,3 @@ const BookingModule = () => {
 };
 
 export default BookingModule;
-
-
-
-
-
-
-
-
-
-
-

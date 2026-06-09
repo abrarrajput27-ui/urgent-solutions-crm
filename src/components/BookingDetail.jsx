@@ -214,7 +214,7 @@ const BookingDetail = () => {
             </div>
           </div>
 
-          <div className="responsive-grid" style={{ gap: '1.5rem', alignItems: 'start' }}>
+          <div className="detail-grid-container" className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
             
             {/* --- LEFT COLUMN --- */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -250,7 +250,7 @@ const BookingDetail = () => {
               {/* Driver & Vehicle Information Card */}
               <Card>
                 <CardHeader icon={Car} title="Driver & Vehicle Information" />
-                <div className="responsive-grid" style={{ gap: '1rem' }}>
+                <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div style={{ background: '#F8FAFC', padding: '1rem', borderRadius: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0F172A', fontWeight: '700', marginBottom: '0.75rem', borderBottom: '1px solid #E2E8F0', paddingBottom: '0.5rem' }}><User size={16} /> Driver Info</div>
                     <DataRow label="Name" value={booking?.driver_name} isBold />
@@ -271,7 +271,7 @@ const BookingDetail = () => {
               {/* Customer Card */}
               <Card>
                 <CardHeader icon={User} title="Customer Information" />
-                <div className="responsive-grid" style={{ gap: '1rem' }}>
+                <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <div style={{ color: '#64748B', fontSize: '0.8rem', fontWeight: '600', textTransform: 'uppercase' }}>Primary Contact</div>
                     <div style={{ fontWeight: '700', color: '#0F172A', fontSize: '1.1rem', marginTop: '0.2rem' }}>{booking?.customer_name || 'N/A'}</div>
@@ -298,7 +298,7 @@ const BookingDetail = () => {
                     <span style={{ fontWeight: '700', color: '#0F172A' }}>{booking?.collection_mode || 'N/A'}</span>
                   </div>
                 </div>
-                <div className="responsive-grid" style={{ gap: '1rem' }}>
+                <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <DataRow label="Cash" value={`₹${(booking?.cash_collection_amount || 0).toLocaleString()}`} />
                   <DataRow label="Paytm" value={`₹${(booking?.paytm_collection_amount || 0).toLocaleString()}`} />
                   <DataRow label="UPI" value={`₹${(booking?.upi_collection_amount || 0).toLocaleString()}`} />
@@ -318,7 +318,7 @@ const BookingDetail = () => {
                     {booking?.settlement_status || 'Unsettled'}
                   </span>
                 } />
-                <div className="responsive-grid" style={{ gap: '1rem', marginBottom: '1rem' }}>
+                <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div style={{ background: '#F8FAFC', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #3B82F6' }}>
                     <div style={{ color: '#64748B', fontSize: '0.8rem', fontWeight: '600', textTransform: 'uppercase' }}>Collection Total</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0F172A' }}>₹{(booking?.collection_total || 0).toLocaleString()}</div>
@@ -341,7 +341,7 @@ const BookingDetail = () => {
               {/* Trip Expense Breakdown Card */}
               <Card>
                 <CardHeader icon={Calculator} title="Trip Expense Breakdown" rightElement={<span style={{ fontWeight: '700', color: '#DC2626', fontSize: '1.1rem', background: '#FEF2F2', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>Total: ₹{(booking?.total_trip_expenses || 0).toLocaleString()}</span>} />
-                <div className="responsive-grid" style={{ gap: '1rem' }}>
+                <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'x 1rem' }}>
                   <DataRow label="CNG" value={`₹${(booking?.expense_cng || 0).toLocaleString()}`} />
                   <DataRow label="Petrol Filled" value={`₹${(booking?.expense_petrol_filled || 0).toLocaleString()}`} />
                   <DataRow label="Petrol Running KM" value={`₹${(booking?.expense_petrol_running_km || 0).toLocaleString()}`} />
@@ -369,7 +369,7 @@ const BookingDetail = () => {
               {/* Ledger Impact Card */}
               <Card>
                 <CardHeader icon={FileSpreadsheet} title="Ledger Impact Preview" />
-                <div className="responsive-grid" style={{ gap: '0.5rem' }}>
+                <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#166534', background: '#F0FDF4', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Booking Ledger</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#166534', background: '#F0FDF4', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Customer Sheet</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#166534', background: '#F0FDF4', padding: '0.5rem', borderRadius: '6px', fontWeight: '600' }}><CheckCircle2 size={14} /> Driver Sheet</div>

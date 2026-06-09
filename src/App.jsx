@@ -9,6 +9,7 @@ import Customers from './components/Customers';
 import CustomerDetail from './components/CustomerDetail';
 import Drivers from './components/Drivers';
 import DriverDetail from './components/DriverDetail';
+import LeadsDashboard from './components/LeadsDashboard';
 import './index.css';
 
 const NotFound = () => (
@@ -36,6 +37,7 @@ function App() {
         <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="/drivers" element={<Drivers />} />
         <Route path="/drivers/:id" element={<DriverDetail />} />
+        <Route path="/leads" element={<LeadsDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

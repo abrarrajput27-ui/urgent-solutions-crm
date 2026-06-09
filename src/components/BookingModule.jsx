@@ -358,7 +358,7 @@ const BookingModule = () => {
       driver_ownership: driverOwnership,
       vehicle_ownership: vehicleOwnership,
       booking_status: basic.status,
-      booking_date: basic.date,
+      booking_date: basic.date || null,
       pickup_datetime: basic.pickupDate && basic.pickupDate.includes('T') ? `${basic.pickupDate}:00` : basic.pickupDate ? `${basic.pickupDate}T${basic.pickupTime || '00:00'}:00` : null,
       pickup_date: basic.pickupDate || null,
       pickup_time: basic.pickupTime || null,
@@ -579,14 +579,14 @@ const BookingModule = () => {
                 )}
                 {sourceCategory === 'Direct' && directCustomerType === 'Old Customer' && (
                   <>
-                    <div className="form-group" style={{gridColumn: 'span 2'}}>
+                    <div className="form-group" style={{gridColumn: '1 / -1'}}>
                       <label>Search Old Customer (Mobile No.)</label>
                       <div style={{display:'flex', gap:'0.5rem'}}>
                         <input type="text" className="form-control" placeholder="Enter Mobile Number" style={{flex: 1}} />
                         <button className="btn-modal-secondary" style={{padding:'0 1rem', borderRadius:'6px', cursor:'pointer', fontWeight:'600'}}>Fetch Data</button>
                       </div>
                     </div>
-                    <div style={{gridColumn: 'span 3', background:'#F0FDF4', padding:'0.75rem', borderRadius:'8px', border:'1px solid #86EFAC', fontSize:'0.85rem', color:'#166534', marginTop:'0.5rem'}}>
+                    <div style={{gridColumn: '1 / -1', background:'#F0FDF4', padding:'0.75rem', borderRadius:'8px', border:'1px solid #86EFAC', fontSize:'0.85rem', color:'#166534', marginTop:'0.5rem'}}>
                       <strong>✓ Customer Found:</strong> Rahul Sharma (+91 9876543210)<br/>
                       <strong>Last Trip:</strong> 15-May-2026 | Delhi to Jaipur | Sedan<br/>
                       <strong>Previous Revenue:</strong> ₹1,500 | <strong>Rating:</strong> ⭐⭐⭐⭐⭐
@@ -670,10 +670,10 @@ const BookingModule = () => {
                   </div>
                 )}
                 <div className="form-group"><label>Number of Days</label><input type="number" className="form-control" min="1" value={basic.days} onChange={e => setBasic({...basic, days: e.target.value})} /></div>
-                <div className="form-group" style={{ gridColumn: 'span 3' }}><label>Pickup Location</label><input type="text" className="form-control" placeholder="City / Complete Address" value={basic.pickup} onChange={e => setBasic({...basic, pickup: e.target.value})} /></div>
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}><label>Pickup Location</label><input type="text" className="form-control" placeholder="City / Complete Address" value={basic.pickup} onChange={e => setBasic({...basic, pickup: e.target.value})} /></div>
                 
                 {basic.tripType === 'Round-Trip Outstation' && (
-                  <div className="form-group" style={{ gridColumn: 'span 3' }}>
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                     <label>Intermediate Stops</label>
                     {(basic.stops || []).map((stop, i) => (
                       <div key={i} style={{display:'flex', gap:'0.5rem', marginBottom:'0.5rem'}}>
@@ -692,8 +692,8 @@ const BookingModule = () => {
                   </div>
                 )}
 
-                <div className="form-group" style={{ gridColumn: 'span 3' }}><label>Drop Location</label><input type="text" className="form-control" placeholder="City / Complete Address" value={basic.drop} onChange={e => setBasic({...basic, drop: e.target.value})} /></div>
-                <div className="form-group" style={{ gridColumn: 'span 3' }}><label>Auto-Generated Route</label><input type="text" className="form-control" placeholder="Route will auto-generate..." value={generatedRoute} disabled style={{background:'#F1F5F9', color:'#334155', fontWeight:'600'}} /></div>
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}><label>Drop Location</label><input type="text" className="form-control" placeholder="City / Complete Address" value={basic.drop} onChange={e => setBasic({...basic, drop: e.target.value})} /></div>
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}><label>Auto-Generated Route</label><input type="text" className="form-control" placeholder="Route will auto-generate..." value={generatedRoute} disabled style={{background:'#F1F5F9', color:'#334155', fontWeight:'600'}} /></div>
               </div>
               <div className="form-group" style={{marginTop:'1rem'}}>
                 <label>Booking Notes</label>
@@ -1068,3 +1068,6 @@ const BookingModule = () => {
 };
 
 export default BookingModule;
+
+
+

@@ -14,7 +14,7 @@ const BookingModule = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
-  const [bookingIdLabel, setBookingIdLabel] = useState(`UT-2026-${Date.now()}`);
+  const [bookingIdLabel, setBookingIdLabel] = useState("");
 
   // 1 & 2. Source and Vehicle Type
   const [sourceCategory, setSourceCategory] = useState('Direct');
@@ -87,9 +87,44 @@ const BookingModule = () => {
   ]);
   const [showManualExpense, setShowManualExpense] = useState(false);
 
+  const generateNewBookingId = async () => {
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(-2);
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const prefix = `UT${yy}${mm}`;
+
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('booking_id')
+        .like('booking_id', `${prefix}%`)
+        .order('booking_id', { ascending: false })
+        .limit(1);
+        
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const lastId = data[0].booking_id;
+        const seriesStr = lastId.replace(prefix, '');
+        const seriesNum = parseInt(seriesStr, 10);
+        if (!isNaN(seriesNum)) {
+          const newSeries = String(seriesNum + 1).padStart(3, '0');
+          setBookingIdLabel(`${prefix}${newSeries}`);
+          return;
+        }
+      }
+      setBookingIdLabel(`${prefix}001`);
+    } catch (err) {
+      console.error("Error generating booking ID:", err);
+      setBookingIdLabel(`${prefix}001`);
+    }
+  };
+
   useEffect(() => {
     if (isEditMode) {
       fetchBookingDetails();
+    } else {
+      generateNewBookingId();
     }
   }, [id]);
 
